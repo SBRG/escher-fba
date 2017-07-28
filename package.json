@@ -1,0 +1,22 @@
+{
+  "name": "escher-fba",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@just-boris/preact-scripts": "1.0.7",
+    "glpk.js": "https://github.com/hgourvest/glpk.js",
+    "preact-compat": "^3.16.0"
+  },
+  "devDependencies": {
+    "escher-vis": "^1.6.0",
+    "preact": "^8.2.1",
+    "preact-range-slider": "^0.1.2",
+    "tslib": "^1.7.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}

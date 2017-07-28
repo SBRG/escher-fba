@@ -1,0 +1,10 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+}
+
+div.range-slider {
+  width: 95%;
+  margin: auto;
+}

@@ -78,6 +78,12 @@ class FBA extends Component {
     }
     return { f: f, x: x };
   }
+
+  build_and_solve(model) {
+    let problem = this.build_glpk_problem(model)
+    let result = this.optimize(problem)
+    return result
+  }
 }
 
 export default FBA;

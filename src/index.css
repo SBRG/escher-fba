@@ -4,6 +4,14 @@ body {
   font-family: sans-serif;
 }
 
+.App {
+  height: 800px;
+}
+
+.EscherContainer {
+  height: 800px;
+}
+
 div.range-slider {
   width: 95%;
   margin: auto;

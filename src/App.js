@@ -10,8 +10,8 @@ import model from './E coli core.json';
 class App extends Component {
   componentDidMount() {
     const fba = new FBA()
-    var problem = fba.build_glpk_problem(model)
-    console.log(fba.optimize(problem))
+    var result = fba.build_and_solve(model)
+    
   }
   render() {
     return (

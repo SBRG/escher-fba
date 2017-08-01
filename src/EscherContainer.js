@@ -17,7 +17,7 @@ class EscherContainer extends Component {
       console.warn('Builder not loaded yet')
       return
     }
-    console.log('Setting reaction data')
+    //console.log('Setting reaction data')
     this.state.builder.set_reaction_data(nextProps.reaction_data)
   }
 
@@ -33,16 +33,18 @@ class EscherContainer extends Component {
           if (model.reactions[i].id === state.biggId) {
             lowerBound = model.reactions[i].lower_bound
             upperBound = model.reactions[i].upper_bound
-            console.log(lowerBound)
           }
         }
-        render (<TooltipComponent 
-          lowerBound={ lowerBound } 
-          upperBound={ upperBound }
-          />, el)
+        render(
+          <TooltipComponent 
+            lowerBound={ lowerBound } 
+            upperBound={ upperBound }
+            sliderChange={ f => this.props.sliderChange(f, state.biggId) }
+          />, 
+        el)
       }
     })
-    this.setState ({ builder: b })
+    this.setState({ builder: b })
   }
 
   render () {

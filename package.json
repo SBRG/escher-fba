@@ -10,9 +10,12 @@
     "preact-compat": "^3.16.0"
   },
   "devDependencies": {
+    "babel-eslint": "^7.2.3",
     "escher-vis": "^1.6.0",
     "preact": "^8.2.1",
     "preact-range-slider": "^0.1.2",
+    "snazzy": "^7.0.0",
+    "standard": "^10.0.2",
     "tslib": "^1.7.1"
   },
   "scripts": {
@@ -21,6 +24,10 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "lint": "standard --fix | snazzy"
+  },
+  "standard": {
+    "parser": "babel-eslint"
   }
 }

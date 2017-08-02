@@ -2,14 +2,15 @@ body {
   margin: 0;
   padding: 0;
   font-family: sans-serif;
+  min-height: 100vh;
 }
 
 .App {
-  height: 800px;
+  height: 100vh;
 }
 
 .EscherContainer {
-  height: 800px;
+  height: 100%;
 }
 
 div.range-slider {

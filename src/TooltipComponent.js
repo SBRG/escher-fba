@@ -1,6 +1,9 @@
 import { h, Component } from 'preact'
 import { MultiSlider } from 'preact-range-slider'
 import 'preact-range-slider/assets/index.css'
+import * as escher from 'escher-vis'
+
+const _ = escher.libs.underscore
 
 class TooltipComponent extends Component {
   sliderChange (bounds) {
@@ -8,7 +11,7 @@ class TooltipComponent extends Component {
   }
 
   render () {
-    var tipConverter = (f) => f === 0 ? -1000 : f === 52 ? 1000 : f - 26
+    var tipConverter = f => f === 0 ? -1000 : f === 52 ? 1000 : f - 26
 
     const boundConverter = x => x.map(tipConverter)
 
@@ -38,6 +41,7 @@ class TooltipComponent extends Component {
           tipFormatter={ f => tipConverter(f) }
           allowCross={ false }
           pushable={ 0 }
+          onChange={ _.throttle(f => this.sliderChange(boundConverter(f))) }
           onAfterChange={ f => this.sliderChange(boundConverter(f)) }
         />
       </div>

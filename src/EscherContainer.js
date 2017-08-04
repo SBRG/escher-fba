@@ -10,7 +10,8 @@ class EscherContainer extends Component {
       model: this.props.model,
       map: this.props.map,
       builder: null,
-      tooltipForceRenderFunction: null
+      tooltipForceRenderFunction: null,
+      isCurrentObjective: false
     }
   }
   shouldComponentUpdate = () => false
@@ -37,8 +38,15 @@ class EscherContainer extends Component {
         var map_size = b.zoom_container.get_size()
         var x = window_scale * state.loc.x + window_translate.x
         var y = window_scale * state.loc.y + window_translate.y
-        console.log(x, y, map_size)
-      
+
+        if (x + 500 > map_size.width) {
+          el.style.left = (parseInt(el.style.left, 10) - 500) + 'px'
+        }
+
+        if (y + 120 > map_size.height) {
+          el.style.top = (parseInt(el.style.top, 10) - 120) + 'px'
+        }
+
         for (let i = 0; i < el.children.length; i++) {
           el.children[i].remove()          
         }
@@ -60,6 +68,15 @@ class EscherContainer extends Component {
             lowerBound = this.state.model.reactions[i].lower_bound
             upperBound = this.state.model.reactions[i].upper_bound
             biggId = state.biggId
+            if (this.props.currentObjective === state.biggId) {
+              this.setState({
+                isCurrentObjective: true
+              })
+            } else {
+              this.setState({
+                isCurrentObjective: false
+              })
+            }
             if (this.props.reactionData !== null) {
               currentFlux = this.props.reactionData[state.biggId]
             } 
@@ -67,12 +84,15 @@ class EscherContainer extends Component {
         }
         render(
           <TooltipComponent
+            //  would work better if we could use: displacement={{x: -100, y: 200}}
             lowerBound={lowerBound}
             upperBound={upperBound}
             biggId={biggId}
             currentFlux={currentFlux}
+            isCurrentObjective={this.state.isCurrentObjective}
             sliderChange={f => this.props.sliderChange(f, state.biggId)}
             resetReaction={(biggId) => this.props.resetReaction(biggId)}
+            setObjective={(biggId) => this.props.setObjective(biggId)}
           />,
         el)
       }

@@ -15,7 +15,11 @@ const buttonStyle = {
 
 class App extends Component {
   componentWillMount () {
-    this.setState({ model: new Model(modelData), oldModel: new Model(modelData) })
+    this.setState({ 
+      model: new Model(modelData), 
+      oldModel: new Model(modelData),
+      currentObjective: 'Biomass_Ecoli_core_w_GAM'
+    })
   }
   
   componentDidMount () {    
@@ -46,7 +50,10 @@ class App extends Component {
   }
 
   resetMap () {
-    this.setState({ model: new Model(modelData) })
+    this.setState({
+      model: new Model(modelData),
+      currentObjective: 'Biomass_Ecoli_core_w_GAM'
+    })
     let solution = this.state.model.optimize()
     if (solution.objectiveValue < 1e-3) {
       this.setState({ reactionData: null })
@@ -74,6 +81,28 @@ class App extends Component {
     }
   }
 
+  setObjective (biggId) {
+    const reactions = this.state.model.reactions
+    for (let i = 0, l = reactions.length; i < l; i++) {
+      if (reactions[i].id === biggId) {
+        reactions[i].objective_coefficient = 1
+      } else {
+        reactions[i].objective_coefficient = 0
+      }
+    }
+    let solution = this.state.model.optimize()
+    if (solution.objectiveValue < 1e-3) {
+      this.setState({ reactionData: null })
+      console.log('You killed E.coli!')
+    } else {
+      this.setState({ 
+        reactionData: solution.fluxes, 
+        model: this.state.model,
+        currentObjective: biggId
+      })
+    }
+  }
+
   render () {
     //  console.log('Rendering')
     return (
@@ -83,8 +112,10 @@ class App extends Component {
           oldModel={this.state.oldModel}
           map={map}
           reactionData={this.state.reactionData}
+          currentObjective={this.state.currentObjective}
           sliderChange={(bounds, biggId) => this.sliderChange(bounds, biggId)}
           resetReaction={(biggId) => this.resetReaction(biggId)}
+          setObjective={(biggId) => this.setObjective(biggId)}
         />
         <button 
           className='resetMapButton' 

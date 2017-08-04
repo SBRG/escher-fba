@@ -1,15 +1,25 @@
 import { h, Component } from 'preact'
 import './App.css'
 import 'preact-range-slider/assets/index.css'
-//  import { MultiSlider } from 'preact-range-slider'
 import EscherContainer from './EscherContainer.js'
 import { Model } from './COBRA.js'
 import modelData from './E coli core.json'
+import map from './E coli core.Core metabolism.json'
+
+const buttonStyle = {
+  'position': 'absolute',
+  'right': '2%',
+  'bottom': '2%',
+  'color': 'black'
+}
 
 class App extends Component {
-  componentDidMount () {
-    this.setState({ model: new Model(modelData) })
-    var solution = this.state.model.optimize()
+  componentWillMount () {
+    this.setState({ model: new Model(modelData), oldModel: new Model(modelData) })
+  }
+  
+  componentDidMount () {    
+    let solution = this.state.model.optimize()
     if (solution.objectiveValue < 1e-3) {
       this.setState({ reactionData: null })
       console.log('You killed E.coli!')
@@ -19,14 +29,14 @@ class App extends Component {
   }
 
   sliderChange (bounds, biggId) {
-    const reactions = this.state.model.reactions
+    let reactions = this.state.model.reactions
     for (let i = 0, l = reactions.length; i < l; i++) {
       if (reactions[i].id === biggId) {
         reactions[i].lower_bound = bounds[0]
         reactions[i].upper_bound = bounds[1]
       }
     }
-    var solution = this.state.model.optimize()
+    let solution = this.state.model.optimize()
     if (solution.objectiveValue < 1e-3) {
       this.setState({ reactionData: null })
       console.log('You killed E.coli!')
@@ -35,25 +45,54 @@ class App extends Component {
     }
   }
 
+  resetMap () {
+    this.setState({ model: new Model(modelData) })
+    let solution = this.state.model.optimize()
+    if (solution.objectiveValue < 1e-3) {
+      this.setState({ reactionData: null })
+      console.log('You killed E.coli!')
+    } else {
+      this.setState({ reactionData: solution.fluxes })
+    }
+  }
+
+  resetReaction (biggId) {
+    const reactions = this.state.model.reactions
+    const oldReactions = this.state.oldModel.reactions
+    for (let i = 0, l = reactions.length; i < l; i++) {
+      if (reactions[i].id === biggId) {
+        reactions[i].lower_bound = oldReactions[i].lower_bound
+        reactions[i].upper_bound = oldReactions[i].upper_bound
+      }
+    }
+    let solution = this.state.model.optimize()
+    if (solution.objectiveValue < 1e-3) {
+      this.setState({ reactionData: null })
+      console.log('You killed E.coli!')
+    } else {
+      this.setState({ reactionData: solution.fluxes, model: this.state.model })
+    }
+  }
+
   render () {
     //  console.log('Rendering')
     return (
       <div className='App'>
         <EscherContainer
+          model={this.state.model}
+          oldModel={this.state.oldModel}
+          map={map}
           reactionData={this.state.reactionData}
           sliderChange={(bounds, biggId) => this.sliderChange(bounds, biggId)}
+          resetReaction={(biggId) => this.resetReaction(biggId)}
         />
-        {/* <div className="Slider">
-          <MultiSlider
-          min={ 0 }
-          max={ 52 }
-          defaultValue={ [0, 52] }
-          tipFormatter={ f => f === 0 ? -1000 : f === 52 ? 1000 : f - 26 }
-          // allowCross={ false }
-          // pushable={ 1 }
-          //onAfterChange={(value)=>[min, max]}
-          />
-        </div> */}
+        <button 
+          className='resetMapButton' 
+          style={buttonStyle}
+          onClick={() => this.resetMap()}
+          >
+          Reset Map
+        </button>
       </div>
     )
   }

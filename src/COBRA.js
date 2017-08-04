@@ -8,11 +8,11 @@ import {
 
 export class Model {
   constructor (data) {
-    this.reactions = data.reactions
-    this.metabolites = data.metabolites
-    this.genes = data.genes
+    this.reactions = data.reactions.map(x => ({...x}))
+    this.metabolites = data.metabolites.map(x => ({...x}))
+    this.genes = data.genes.map(x => ({...x}))
     this.id = data.id
-    this.notes = data.notes
+    this.notes = data.notes // TODO is this an object? if so clone
     this.description = data.description
   }
 

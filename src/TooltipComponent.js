@@ -25,36 +25,74 @@ const tipConverter = f => f === 0 ? -1000 : f === 52 ? 1000 : f - 26
 const boundConverter = x => x.map(tipConverter)
 
 class TooltipComponent extends Component {
+  constructor (props) {
+    super(props)
+    this.state = {
+      lowerBound: this.props.lowerBound,
+      upperBound: this.props.upperBound,
+      currentFlux: fluxConverter(this.props.currentFlux)
+    }
+  }
+
+  componentWillReceiveProps (nextProps) {
+    this.setState({
+      lowerBound: this.nextProps.lowerBound,
+      upperBound: this.nextProps.upperBound
+    })
+  }
+
+  resetReaction (biggId) {
+    this.props.resetReaction(biggId)
+  }
+
   sliderChange (bounds) {
     this.props.sliderChange(bounds)
+    this.setState({
+      lowerBound: bounds[0],
+      upperBound: bounds[1]
+    })
   }
 
   render () {
-    let currentFlux = fluxConverter(this.props.currentFlux)
     //  console.log('Rendering Tooltip', this.props)
     return (
-      <div className='Slider' style={tooltipStyle} >
+      <div className='Tooltip' style={tooltipStyle}>
         <MultiSlider
           min={0}
           max={52}
-          defaultValue={[this.props.lowerBound + 26,
-            this.props.upperBound + 26]}
+          defaultValue={[
+            this.state.lowerBound + 26,
+            this.state.upperBound + 26
+          ]}
           tipFormatter={f => tipConverter(f)}
           allowCross={false}
           pushable={0}
           onChange={_.throttle(f => this.sliderChange(boundConverter(f)))}
           onAfterChange={f => this.sliderChange(boundConverter(f))}
-          marks={ { [currentFlux]: <div style={markerStyle}>
-            &#11014;<br />Current Flux<br />{[tipConverter(currentFlux)]}</div> } }
-          //  marks={fluxConverter(this.props.currentFlux): fluxConverter(this.props.currentFlux)} 
+          marks={ { [this.state.currentFlux]: <div style={markerStyle}>
+            &#11014;<br />Current Flux<br />{[tipConverter(this.state.currentFlux)]}</div> } 
+          }
         />
         <div className='Buttons'>
           <button
-            className='knockoutButton'
-            style={{'min-height': '20px', 'min-width': '50px'}}
-            content={'Knockout Reaction'}
-            toggle='true'
-          />
+            className='knockoutButton' 
+            onClick={() => this.sliderChange([0,0])}
+          >
+            Knockout Reaction
+          </button>
+          <br/>
+          <button
+            className='resetReactionButton' 
+            onClick={() => this.resetReaction(this.props.biggId)}
+          >
+            Reset
+          </button>
+          <br/>
+          <button 
+            className='objectiveButton'
+          >
+            Set Objective
+          </button>
         </div>
       </div>
     )

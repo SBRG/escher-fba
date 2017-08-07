@@ -15,14 +15,14 @@ const buttonStyle = {
 
 class App extends Component {
   componentWillMount () {
-    this.setState({ 
-      model: new Model(modelData), 
+    this.setState({
+      model: new Model(modelData),
       oldModel: new Model(modelData),
       currentObjective: 'Biomass_Ecoli_core_w_GAM'
     })
   }
-  
-  componentDidMount () {    
+
+  componentDidMount () {
     let solution = this.state.model.optimize()
     if (solution.objectiveValue < 1e-3) {
       this.setState({ reactionData: null })
@@ -32,21 +32,28 @@ class App extends Component {
     }
   }
 
+  modelOptimize () {
+    //  TODO
+  }
+
   /**
-   * Loops through the model's list of reactions until it finds the one that matches the BiGG ID parameter then sets the lower and upper bounds of that
-   * reaction to the bounds contained in the bounds parameter before finding the new set of fluxes and setting the state of reactionData.
-   * @param {number[]} bounds - A two membered list of a reaction's lower and upper bounds, respectively.
+   * Loops through the model's list of reactions until it finds the one that
+   * matches the BiGG ID parameter then sets the lower and upper bounds of that
+   * reaction to the bounds contained in the bounds parameter before finding the
+   * new set of fluxes and setting the state of reactionData.
+   * @param {number[]} bounds - A two membered list of a reaction's lower and
+   * upper bounds, respectively.
    * @param {string} biggId - BiGG ID of the reaction.
    */
   sliderChange (bounds, biggId) {
-    let reactions = this.state.model.reactions
+    const reactions = this.state.model.reactions
     for (let i = 0, l = reactions.length; i < l; i++) {
       if (reactions[i].id === biggId) {
         reactions[i].lower_bound = bounds[0]
         reactions[i].upper_bound = bounds[1]
       }
     }
-    let solution = this.state.model.optimize()
+    const solution = this.state.model.optimize()
     if (solution.objectiveValue < 1e-3) {
       this.setState({ reactionData: null })
       console.log('You killed E.coli!')
@@ -56,14 +63,15 @@ class App extends Component {
   }
 
   /**
-   * Handles the Reset Map button press. Resets state and objective function to the original model and finds the set of fluxes.
+   * Handles the Reset Map button press. Resets state and objective function to
+   * the original model and finds the set of fluxes.
    */
   resetMap () {
     this.setState({
       model: new Model(modelData),
       currentObjective: 'Biomass_Ecoli_core_w_GAM'
     })
-    let solution = this.state.model.optimize()
+    const solution = this.state.model.optimize()
     if (solution.objectiveValue < 1e-3) {
       this.setState({ reactionData: null })
       console.log('You killed E.coli!')
@@ -73,8 +81,10 @@ class App extends Component {
   }
 
   /**
-   * Loops through the list of reactions until the reaction matching the BiGG ID is found then sets the lower and upper bounds of that reaction to whatever
-   * they were originally before finding the new set of fluxes and setting the state of reactionData.
+   * Loops through the list of reactions until the reaction matching the BiGG ID
+   * is found then sets the lower and upper bounds of that reaction to whatever
+   * they were originally before finding the new set of fluxes and setting the
+   * state of reactionData.
    * @param {string} biggId - BiGG ID of the reaction.
    */
   resetReaction (biggId) {
@@ -86,7 +96,7 @@ class App extends Component {
         reactions[i].upper_bound = oldReactions[i].upper_bound
       }
     }
-    let solution = this.state.model.optimize()
+    const solution = this.state.model.optimize()
     if (solution.objectiveValue < 1e-3) {
       this.setState({ reactionData: null })
       console.log('You killed E.coli!')
@@ -96,8 +106,11 @@ class App extends Component {
   }
 
   /**
-   * Loops through the list of reactions setting all objective coefficients to 0 except for the one matching the given BiGG ID which it sets to 1.
-   * Subsequently finds the new set of fluxes and sets the state of reactionData.
+   * Loops through the list of reactions setting all objective coefficients to 0
+   * except for the one matching the given BiGG ID which it sets to 1.
+   * Subsequently finds the new set of fluxes and sets the state of
+   * reactionData, changes the model in state, and tracks the current objective
+   * in the currentObjective state.
    * @param {string} biggId - BiGG ID of the reaction.
    */
   setObjective (biggId) {
@@ -109,13 +122,13 @@ class App extends Component {
         reactions[i].objective_coefficient = 0
       }
     }
-    let solution = this.state.model.optimize()
+    const solution = this.state.model.optimize()
     if (solution.objectiveValue < 1e-3) {
       this.setState({ reactionData: null })
       console.log('You killed E.coli!')
     } else {
-      this.setState({ 
-        reactionData: solution.fluxes, 
+      this.setState({
+        reactionData: solution.fluxes,
         model: this.state.model,
         currentObjective: biggId
       })
@@ -136,8 +149,8 @@ class App extends Component {
           resetReaction={(biggId) => this.resetReaction(biggId)}
           setObjective={(biggId) => this.setObjective(biggId)}
         />
-        <button 
-          className='resetMapButton' 
+        <button
+          className='resetMapButton'
           style={buttonStyle}
           onClick={() => this.resetMap()}
           >

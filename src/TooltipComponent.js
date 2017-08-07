@@ -32,16 +32,12 @@ const disabled = {
   'margin-left': '5%',
   'color': 'graytext'
 }
-// const inputStyle = {
-//   ...buttonStyle,
-//   maxWidth: '47px',
-//   textAlign: 'center',
-// }
+const inputStyle = {
+  ...buttonStyle,
+  maxWidth: '47px',
+  textAlign: 'center',
+}
 let objectiveButtonStyle = null
-
-const fluxConverter = f => f < -25 ? -1000 : f > 25 ? 1000 : f + 26
-const tipConverter = f => f === 0 ? -1000 : f === 52 ? 1000 : f - 26
-const boundConverter = x => x.map(tipConverter)
 
 class TooltipComponent extends Component {
   constructor (props) {
@@ -49,32 +45,68 @@ class TooltipComponent extends Component {
     this.state = {
       lowerBound: this.props.lowerBound,
       upperBound: this.props.upperBound,
-      currentFlux: fluxConverter(this.props.currentFlux)
+      currentFlux: this.fluxConverter(this.props.currentFlux)
     }
     if (!this.props.isCurrentObjective) {
       objectiveButtonStyle = buttonStyle
     } else {
       objectiveButtonStyle = disabled
     }
-    //this.handleInputChange = this.handleInputChange.bind(this)
   }
-
+ 
   componentWillReceiveProps (nextProps) {
     this.setState({
       lowerBound: this.nextProps.lowerBound,
-      upperBound: this.nextProps.upperBound
+      upperBound: this.nextProps.upperBound,
     })
     if (!this.props.isCurrentObjective) {
       objectiveButtonStyle = buttonStyle
     } else {
       objectiveButtonStyle = disabled
-    }
+    }    
   }
 
+  /**
+   * Due to bugs inherent in the slider, all values must be converted to fall somewhere onto the positive number line in order to be displayed correctly on the slider.
+   * This function takes a given value and converts it so that it will display on the number line correctly.
+   * @param {number} value - Physiologically relevant number to be displayed on slider.
+   */
+  fluxConverter (value) {
+    let r = value < this.props.lowerRange ? -1000 : value > this.props.upperRange ? 1000 : value + (this.props.upperRange + 1)
+    return r
+  }
+
+  /**
+   * Due to bugs inherent in the slider, all values must be converted to fall somewhere onto the positive number line in order to be displayed correctly on the slider.
+   * This function takes values from the slider and converts them back to a physiologically relevant value.
+   * @param {number} value - Slider value to be converted to physiologically relevant value.
+   */
+  tipConverter (value) {
+    let r = value === 0 ? -1000 : value === (2*(this.props.upperRange + 1)) ? 1000 : value - (this.props.upperRange + 1)
+    return r
+  }
+
+  /**
+   * Function for applying tipConverter to arrays of numbers.
+   * @param {number[]} array - Pair of values (lower and upper bounds, respectively) to be converted from slider values to physiologically relevant values.
+   */
+  boundConverter (array) {
+    let r = array.map(this.tipConverter.bind(this))
+    return r
+  }
+
+  /**
+   * Event listener for App's resetReaction method. Sends current BiGG ID up to EscherContainer.
+   * @param {string} biggId - The BiGG ID of the reaction.
+   */
   resetReaction (biggId) {
     this.props.resetReaction(biggId)
   }
 
+  /**
+   * Handles all changes to the reaction made within the tooltip itself. First passes the new values up the hierarchy then sets the internal state.
+   * @param {number[]} bounds - The new lower and upper bounds, respectively, of the reaction.
+   */
   sliderChange (bounds) {
     this.props.sliderChange(bounds)
     this.setState({
@@ -83,11 +115,16 @@ class TooltipComponent extends Component {
     })
   }
 
-  // handleInputChange(event) {
-  //   this.setState({
-  //     lowerBound: parseInt(event.target.value, 10)
-  //   })
-  // }
+  /**
+   * Handler for the bound input fields. Extracts the field's name from event.target and uses it to decide which bound to modify before passing the changes up the hierarchy.
+   * @param {Object} event - Reference to the onChange event of the input field.
+   */
+  handleInputChange(event) {
+    this.setState({
+      [event.target.name]: parseInt(event.target.value, 10)
+    })
+    this.props.sliderChange([this.state.lowerBound, this.state.upperBound])
+  }
 
   render () {
     //  console.log('Rendering Tooltip', this.props)
@@ -101,28 +138,28 @@ class TooltipComponent extends Component {
         >
         <MultiSlider
           min={0}
-          max={52}
+          max={2*(this.props.upperRange + 1)}
           defaultValue={[
             this.state.lowerBound + 26,
             this.state.upperBound + 26
           ]}
-          tipFormatter={f => tipConverter(f)}
+          tipFormatter={f => this.tipConverter(f)}
           allowCross={false}
           pushable={0}
-          onChange={_.throttle(f => this.sliderChange(boundConverter(f)))}
-          onAfterChange={f => this.sliderChange(boundConverter(f))}
+          onChange={_.throttle(f => this.sliderChange(this.boundConverter(f)))}
+          onAfterChange={f => this.sliderChange(this.boundConverter(f))}
           marks={ { [this.state.currentFlux]: <div style={markerStyle}>
-            &#11014;<br />Current Flux<br />{[tipConverter(this.state.currentFlux)]}</div> } 
+            <div style={{fontSize: '20px'}}>&#11014;</div>Current Flux: {[escher.data_styles.text_for_data([this.tipConverter(this.state.currentFlux)], true)]}</div> } 
           }
         />
         <div className='InterfacePanel' style={InterfacePanelStyle}>
-          {/* <input 
+          <input 
             type='text'
             name='lowerBound'
             value={this.state.lowerBound}
             style={inputStyle}
-            onChange={this.handleInputChange}
-            /> */}
+            onChange={this.handleInputChange.bind(this)}
+          /> 
           <button
             className='knockoutButton' 
             onClick={() => this.sliderChange([0,0])}
@@ -145,12 +182,13 @@ class TooltipComponent extends Component {
           >
             Set Objective
           </button>
-          {/* <input 
+          <input 
             type='text'
             name='upperBound'
             value={this.state.upperBound}
-            defaultValue={this.state.upperBound}
-            style={inputStyle}/> */}
+            style={inputStyle}
+            onChange={this.handleInputChange.bind(this)}
+          /> 
         </div>
       </div>
     )

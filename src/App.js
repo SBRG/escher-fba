@@ -32,6 +32,12 @@ class App extends Component {
     }
   }
 
+  /**
+   * Loops through the model's list of reactions until it finds the one that matches the BiGG ID parameter then sets the lower and upper bounds of that
+   * reaction to the bounds contained in the bounds parameter before finding the new set of fluxes and setting the state of reactionData.
+   * @param {number[]} bounds - A two membered list of a reaction's lower and upper bounds, respectively.
+   * @param {string} biggId - BiGG ID of the reaction.
+   */
   sliderChange (bounds, biggId) {
     let reactions = this.state.model.reactions
     for (let i = 0, l = reactions.length; i < l; i++) {
@@ -49,6 +55,9 @@ class App extends Component {
     }
   }
 
+  /**
+   * Handles the Reset Map button press. Resets state and objective function to the original model and finds the set of fluxes.
+   */
   resetMap () {
     this.setState({
       model: new Model(modelData),
@@ -63,6 +72,11 @@ class App extends Component {
     }
   }
 
+  /**
+   * Loops through the list of reactions until the reaction matching the BiGG ID is found then sets the lower and upper bounds of that reaction to whatever
+   * they were originally before finding the new set of fluxes and setting the state of reactionData.
+   * @param {string} biggId - BiGG ID of the reaction.
+   */
   resetReaction (biggId) {
     const reactions = this.state.model.reactions
     const oldReactions = this.state.oldModel.reactions
@@ -81,6 +95,11 @@ class App extends Component {
     }
   }
 
+  /**
+   * Loops through the list of reactions setting all objective coefficients to 0 except for the one matching the given BiGG ID which it sets to 1.
+   * Subsequently finds the new set of fluxes and sets the state of reactionData.
+   * @param {string} biggId - BiGG ID of the reaction.
+   */
   setObjective (biggId) {
     const reactions = this.state.model.reactions
     for (let i = 0, l = reactions.length; i < l; i++) {

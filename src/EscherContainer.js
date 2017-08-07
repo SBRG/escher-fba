@@ -1,7 +1,10 @@
 import { h, Component, render } from 'preact'
+import * as escher from 'escher-vis'
 import { Builder } from 'escher-vis'
 import 'escher-vis/css/dist/builder.css'
 import TooltipComponent from './TooltipComponent.js'
+//  const d3_select = escher.libs.d3_select
+const _ = escher.libs.underscore
 
 class EscherContainer extends Component {
   constructor (props) {
@@ -11,7 +14,8 @@ class EscherContainer extends Component {
       map: this.props.map,
       builder: null,
       tooltipForceRenderFunction: null,
-      isCurrentObjective: false
+      isCurrentObjective: false,
+      koMarkersSel: null,
     }
   }
   shouldComponentUpdate = () => false
@@ -28,10 +32,46 @@ class EscherContainer extends Component {
     })
   }
 
+  kosAddGroup (builder) {
+    // at the beginning
+    const koMarkersSel = builder.selection
+      .select('.zoom-g')
+      .append('g').attr('id', 'ko-markers')
+    this.setState({koMarkersSel})
+
+    _.values(builder.map.reactions, r => r.bigg_id === 'GAPD')
+  }
+
+  /**
+   * 
+   * @param {[String]} reactionList 
+   */
+  koDrawRectanges (reactionList) {
+
+    if (this.state.koMarkersSel === null) {
+      console.warn('this.state.koMarkersSel is not defined')
+      return
+    }
+    // every time this changes
+    const sel = this.state.koMarkersSel.selectAll('.ko')
+      .data(['GAPD'])
+    const g = sel.enter()
+      .append('g')
+    g.append('rect')
+      .style('fill', 'red')
+    g.append('rect')
+      .style('fill', 'red')
+  }
+
   componentDidMount () {
+    // need a story to fix the first_load_callback
+    const self = this
+
     let b
     b = new Builder(this.state.map, this.state.model, null, this.base, {
       fill_screen: true,
+      first_load_callback: function () { self.kosAddGroup(this) },
+      enable_keys: false,
       tooltip_component: ({ el, state }) => {
         var window_translate = b.zoom_container.window_translate
         var window_scale = b.zoom_container.window_scale
@@ -40,11 +80,11 @@ class EscherContainer extends Component {
         var y = window_scale * state.loc.y + window_translate.y
 
         if (x + 500 > map_size.width) {
-          el.style.left = (parseInt(el.style.left, 10) - 500) + 'px'
+          el.style.left = (x - 500) + 'px'
         }
 
         if (y + 120 > map_size.height) {
-          el.style.top = (parseInt(el.style.top, 10) - 120) + 'px'
+          el.style.top = (y - 120) + 'px'
         }
 
         for (let i = 0; i < el.children.length; i++) {
@@ -93,6 +133,8 @@ class EscherContainer extends Component {
             sliderChange={f => this.props.sliderChange(f, state.biggId)}
             resetReaction={(biggId) => this.props.resetReaction(biggId)}
             setObjective={(biggId) => this.props.setObjective(biggId)}
+            lowerRange={-25}
+            upperRange={25}
           />,
         el)
       }

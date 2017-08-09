@@ -5,8 +5,8 @@ import * as escher from 'escher-vis'
 const _ = escher.libs.underscore
 
 const tooltipStyle = {
-  'min-width': '500px',
-  'min-height': '80px',
+  'width': '500px',
+  'height': '120px',
   'border-radius': '2px',
   'border': '1px solid #b58787',
   'padding': '7px',
@@ -26,7 +26,8 @@ const buttonStyle = {
   'margin-left': '2.5%'
 }
 const markerStyle = {
-  'margin-left': '-99%'
+  'margin-left': '-50%',
+  width: '100%'
 }
 const disabledStyle = {
   'margin-left': '2.5%',
@@ -99,11 +100,15 @@ class TooltipComponent extends Component {
 
   /**
    * Event listener for App's resetReaction method. Sends current BiGG ID up to
-   * EscherContainer.
+   * EscherContainer and sets local lower and upper bound state.
    * @param {string} biggId - The BiGG ID of the reaction.
    */
   resetReaction (biggId) {
     this.props.resetReaction(biggId)
+    this.setState({
+      lowerBound: this.props.oldLowerBound,
+      upperBound: this.props.oldUpperBound
+    })
   }
 
   /**
@@ -147,7 +152,7 @@ class TooltipComponent extends Component {
         <MultiSlider
           min={0}
           max={2 * (this.props.upperRange + 1)}
-          defaultValue={[
+          value={[
             this.state.lowerBound + 26,
             this.state.upperBound + 26
           ]}
@@ -157,7 +162,11 @@ class TooltipComponent extends Component {
           onChange={_.throttle(f => this.sliderChange(this.boundConverter(f)))}
           onAfterChange={f => this.sliderChange(this.boundConverter(f))}
           marks={{ [this.state.currentFlux]: <div style={markerStyle}>
-            <div style={{fontSize: '20px'}}>&#11014;</div>Current Flux: {[escher.data_styles.text_for_data([this.tipConverter(this.state.currentFlux)], true)]}</div> } //  Define outside of return function
+            <div style={{fontSize: '20px'}}>&#11014;</div>
+            <div style={this.props.markerLabelStyle}>
+              Current Flux: {[escher.data_styles.text_for_data([this.tipConverter(this.state.currentFlux)], true)]}
+            </div>
+            </div> } //  Define outside of return function
           }
         />
         {/*Kebab case for class names?  */}

@@ -12,7 +12,9 @@ class EscherContainer extends Component {
     this.state = {
       builder: null,
       isCurrentObjective: false,
-      koMarkersSel: null
+      koMarkersSel: null,
+      lowerRange: -25,
+      upperRange: 25
     }
   }
 
@@ -95,13 +97,18 @@ class EscherContainer extends Component {
         // Get attributes from reaction
         let lowerBound = 0
         let upperBound = 0
+        let oldLowerBound = 0
+        let oldUpperBound = 0
         let currentFlux = 0
         let biggId = null
+        //let markerLabelStyle = null
         // see story on indexing objects by bigg id
         for (let i = 0, l = this.props.model.reactions.length; i < l; i++) {
           if (this.props.model.reactions[i].id === state.biggId) {
             lowerBound = this.props.model.reactions[i].lower_bound
             upperBound = this.props.model.reactions[i].upper_bound
+            oldLowerBound = this.props.oldModel.reactions[i].lower_bound
+            oldUpperBound = this.props.oldModel.reactions[i].upper_bound
             biggId = state.biggId
             if (this.props.currentObjective === state.biggId) {
               this.setState({
@@ -118,19 +125,41 @@ class EscherContainer extends Component {
             break
           }
         }
+
+        let markerPosition = (currentFlux + this.state.upperRange)/(2*(1 + this.state.upperRange))
+        let markerLabelStyle = {}
+        if (markerPosition > 0.8875) {
+          markerLabelStyle = {
+            position: 'relative',
+            left: -(500*(markerPosition - 0.8875)) + '%'
+          }
+        } else if (markerPosition < 0.075) {
+          markerLabelStyle = {
+            position: 'relative',
+            left: -(500*(markerPosition - 0.075)) + '%'
+          }
+        } else {
+          markerLabelStyle = {
+            position: 'relative'
+          }
+        }
+
         render(
           <TooltipComponent
             //  would work better if we could use: displacement={{x: -100, y: 200}}
             lowerBound={lowerBound}
             upperBound={upperBound}
+            oldLowerBound={oldLowerBound}
+            oldUpperBound={oldUpperBound}
             biggId={biggId}
             currentFlux={currentFlux}
             isCurrentObjective={this.state.isCurrentObjective}
             sliderChange={f => this.props.sliderChange(f, state.biggId)}
             resetReaction={biggId => this.props.resetReaction(biggId)}
             setObjective={biggId => this.props.setObjective(biggId)}
-            lowerRange={-25}
-            upperRange={25}
+            lowerRange={this.state.lowerRange}
+            upperRange={this.state.upperRange}
+            markerLabelStyle={markerLabelStyle}
           />,
         el)
       }

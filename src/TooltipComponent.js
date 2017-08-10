@@ -6,7 +6,7 @@ const _ = escher.libs.underscore
 
 const tooltipStyle = {
   'width': '500px',
-  'height': '120px',
+  'height': '135px',
   'border-radius': '2px',
   'border': '1px solid #b58787',
   'padding': '7px',
@@ -23,7 +23,9 @@ const interfacePanelStyle = {
   'margin-left': '0%'
 }
 const buttonStyle = {
-  'margin-left': '2.5%'
+  'margin-left': '2.5%',
+  'margin-top': '-10px',
+  clear: 'both'
 }
 const markerStyle = {
   'margin-left': '-50%',
@@ -31,12 +33,14 @@ const markerStyle = {
 }
 const disabledStyle = {
   'margin-left': '2.5%',
-  'color': 'graytext'
+  'color': 'graytext',
+  clear: 'both'
 }
 const inputStyle = {
   ...buttonStyle,
   maxWidth: '47px',
-  textAlign: 'center'
+  textAlign: 'center',
+  clear: 'both'
 }
 
 class TooltipComponent extends Component {
@@ -66,9 +70,9 @@ class TooltipComponent extends Component {
    */
   fluxConverter (value) {
     return value < this.props.lowerRange // Add parenthesis for better readability
-      ? -1000 
-      : value > this.props.upperRange 
-      ? 1000 
+      ? -1000
+      : value > this.props.upperRange
+      ? 1000
       : value + (this.props.upperRange + 1)
   }
 
@@ -81,10 +85,10 @@ class TooltipComponent extends Component {
    * relevant value.
    */
   tipConverter (value) {
-    return value === 0 
-    ? -1000 
-    : value === (2 * (this.props.upperRange + 1)) 
-    ? 1000 
+    return value === 0
+    ? -1000
+    : value === (2 * (this.props.upperRange + 1))
+    ? 1000
     : value - (this.props.upperRange + 1)
   }
 
@@ -166,11 +170,28 @@ class TooltipComponent extends Component {
             <div style={this.props.markerLabelStyle}>
               Current Flux: {[escher.data_styles.text_for_data([this.tipConverter(this.state.currentFlux)], true)]}
             </div>
-            </div> } //  Define outside of return function
+          </div> } //  Define outside of return function
           }
         />
-        {/*Kebab case for class names?  */}
+        {/* Kebab case for class names?  */}
         <div className='interfacePanel' style={interfacePanelStyle}>
+          <div
+            style={{
+              fontSize: '12px',
+              float: 'left'
+            }}
+          >
+          Lower bound
+          </div>
+          <div
+            style={{
+              fontSize: '12px',
+              float: 'right'
+            }}
+          >
+          Upper bound
+          </div>
+          <br />
           <input
             type='text'
             name='lowerBound'

@@ -68,101 +68,106 @@ class EscherContainer extends Component {
     builder = new Builder(this.props.map, this.props.model, null, this.base, {
       fill_screen: true,
       first_load_callback: function () { self.kosAddGroup(this) },
-      enable_keys: false,
-      tooltip_component: ({ el, state }) => {
-        //  Document any Escher features that are used
-        const window_translate = builder.zoom_container.window_translate
-        const window_scale = builder.zoom_container.window_scale
-        const map_size = builder.zoom_container.get_size()
-        const x = window_scale * state.loc.x + window_translate.x
-        const y = window_scale * state.loc.y + window_translate.y
+      enable_keys: false
 
-        if (x + 500 > map_size.width) {
-          el.style.left = (x - 500) + 'px'
-        }
+      // TODO put this somewhere
+      // for escher-test:
+      // node node_modules\webpack-dev-server\bin\webpack-dev-server.js --hot --inline --color --progress
 
-        if (y + 120 > map_size.height) {
-          el.style.top = (y - 120) + 'px'
-        }
+      // tooltip_component: ({ el, state }) => {
+      //   //  Document any Escher features that are used
+      //   const window_translate = builder.zoom_container.window_translate
+      //   const window_scale = builder.zoom_container.window_scale
+      //   const map_size = builder.zoom_container.get_size()
+      //   const x = window_scale * state.loc.x + window_translate.x
+      //   const y = window_scale * state.loc.y + window_translate.y
 
-        for (let i = 0; i < el.children.length; i++) {
-          el.children[i].remove()
-        }
+      //   if (x + 500 > map_size.width) {
+      //     el.style.left = (x - 500) + 'px'
+      //   }
 
-        // Don't display tooltip for metabolites
-        if (state.type === 'metabolite') {
-          return
-        }
+      //   if (y + 135 > map_size.height) {
+      //     el.style.top = (y - 135) + 'px'
+      //   }
 
-        // Get attributes from reaction
-        let lowerBound = 0
-        let upperBound = 0
-        let oldLowerBound = 0
-        let oldUpperBound = 0
-        let currentFlux = 0
-        let biggId = null
-        //let markerLabelStyle = null
-        // see story on indexing objects by bigg id
-        for (let i = 0, l = this.props.model.reactions.length; i < l; i++) {
-          if (this.props.model.reactions[i].id === state.biggId) {
-            lowerBound = this.props.model.reactions[i].lower_bound
-            upperBound = this.props.model.reactions[i].upper_bound
-            oldLowerBound = this.props.oldModel.reactions[i].lower_bound
-            oldUpperBound = this.props.oldModel.reactions[i].upper_bound
-            biggId = state.biggId
-            if (this.props.currentObjective === state.biggId) {
-              this.setState({
-                isCurrentObjective: true
-              })
-            } else {
-              this.setState({
-                isCurrentObjective: false
-              })
-            }
-            if (this.props.reactionData !== null) {
-              currentFlux = this.props.reactionData[state.biggId]
-            }
-            break
-          }
-        }
+      //   for (let i = 0; i < el.children.length; i++) {
+      //     el.children[i].remove()
+      //   }
 
-        let markerPosition = (currentFlux + this.state.upperRange)/(2*(1 + this.state.upperRange))
-        let markerLabelStyle = {}
-        if (markerPosition > 0.8875) {
-          markerLabelStyle = {
-            position: 'relative',
-            left: -(500*(markerPosition - 0.8875)) + '%'
-          }
-        } else if (markerPosition < 0.075) {
-          markerLabelStyle = {
-            position: 'relative',
-            left: -(500*(markerPosition - 0.075)) + '%'
-          }
-        } else {
-          markerLabelStyle = {
-            position: 'relative'
-          }
-        }
+      //   // Don't display tooltip for metabolites
+      //   if (state.type === 'metabolite') {
+      //     return
+      //   }
 
-        render(
-          <TooltipComponent
-            //  would work better if we could use: displacement={{x: -100, y: 200}}
-            lowerBound={lowerBound}
-            upperBound={upperBound}
-            oldLowerBound={oldLowerBound}
-            oldUpperBound={oldUpperBound}
-            biggId={biggId}
-            currentFlux={currentFlux}
-            isCurrentObjective={this.state.isCurrentObjective}
-            sliderChange={f => this.props.sliderChange(f, state.biggId)}
-            resetReaction={biggId => this.props.resetReaction(biggId)}
-            setObjective={biggId => this.props.setObjective(biggId)}
-            lowerRange={this.state.lowerRange}
-            upperRange={this.state.upperRange}
-            markerLabelStyle={markerLabelStyle}
-          />,
-        el)
-      }
+      //   // Get attributes from reaction
+      //   let lowerBound = 0
+      //   let upperBound = 0
+      //   let oldLowerBound = 0
+      //   let oldUpperBound = 0
+      //   let currentFlux = 0
+      //   let biggId = null
+      //   //  let markerLabelStyle = null
+      //   // see story on indexing objects by bigg id
+      //   for (let i = 0, l = this.props.model.reactions.length; i < l; i++) {
+      //     if (this.props.model.reactions[i].id === state.biggId) {
+      //       lowerBound = this.props.model.reactions[i].lower_bound
+      //       upperBound = this.props.model.reactions[i].upper_bound
+      //       oldLowerBound = this.props.oldModel.reactions[i].lower_bound
+      //       oldUpperBound = this.props.oldModel.reactions[i].upper_bound
+      //       biggId = state.biggId
+      //       if (this.props.currentObjective === state.biggId) {
+      //         this.setState({
+      //           isCurrentObjective: true
+      //         })
+      //       } else {
+      //         this.setState({
+      //           isCurrentObjective: false
+      //         })
+      //       }
+      //       if (this.props.reactionData !== null) {
+      //         currentFlux = this.props.reactionData[state.biggId]
+      //       }
+      //       break
+      //     }
+      //   }
+
+      //   let markerPosition = (currentFlux + this.state.upperRange)/(2*(1 + this.state.upperRange))
+      //   let markerLabelStyle = {}
+      //   if (markerPosition > 0.8875) {
+      //     markerLabelStyle = {
+      //       position: 'relative',
+      //       left: -(500*(markerPosition - 0.8875)) + '%'
+      //     }
+      //   } else if (markerPosition < 0.075) {
+      //     markerLabelStyle = {
+      //       position: 'relative',
+      //       left: -(500*(markerPosition - 0.075)) + '%'
+      //     }
+      //   } else {
+      //     markerLabelStyle = {
+      //       position: 'relative'
+      //     }
+      //   }
+
+      //   render(
+      //     <TooltipComponent
+      //       //  would work better if we could use: displacement={{x: -100, y: 200}}
+      //       lowerBound={lowerBound}
+      //       upperBound={upperBound}
+      //       oldLowerBound={oldLowerBound}
+      //       oldUpperBound={oldUpperBound}
+      //       biggId={biggId}
+      //       currentFlux={currentFlux}
+      //       isCurrentObjective={this.state.isCurrentObjective}
+      //       sliderChange={f => this.props.sliderChange(f, state.biggId)}
+      //       resetReaction={biggId => this.props.resetReaction(biggId)}
+      //       setObjective={biggId => this.props.setObjective(biggId)}
+      //       lowerRange={this.state.lowerRange}
+      //       upperRange={this.state.upperRange}
+      //       markerLabelStyle={markerLabelStyle}
+      //     />,
+      //   el)
+      // }
     })
     this.setState({ builder })
   }

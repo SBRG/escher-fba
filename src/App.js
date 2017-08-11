@@ -148,6 +148,8 @@ class App extends Component {
           sliderChange={(bounds, biggId) => this.sliderChange(bounds, biggId)}
           resetReaction={(biggId) => this.resetReaction(biggId)}
           setObjective={(biggId) => this.setObjective(biggId)}
+          lowerRange={-25}
+          upperRange={25}
         />
         <button
           className='resetMapButton'

@@ -71,14 +71,14 @@ class EscherContainer extends Component {
       sliderChange: f => this.props.sliderChange(f, biggId),
       resetReaction: f => this.props.resetReaction(f),
       setObjective: f => this.props.setObjective(f),
-      step: this.props.step,
-      name: this.props.model.reactions.name
+      step: this.props.step
     })
     for (let i = 0, l = this.props.model.reactions.length; i < l; i++) {
       if (this.props.model.reactions[i].id === biggId) {
         this.setState({
           lowerBound: this.props.model.reactions[i].lower_bound,
-          upperBound: this.props.model.reactions[i].upper_bound
+          upperBound: this.props.model.reactions[i].upper_bound,
+          name: this.props.model.reactions[i].name
         })
         if (this.props.currentObjective === biggId) {
           this.setState({

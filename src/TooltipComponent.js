@@ -122,7 +122,7 @@ function tooltipComponentFactory (getDataFunction) {
             {this.state.biggId}
           </div>
           <div style={{fontSize: '15px'}}>
-            {this.state.name}
+            {getDataFunction(this.state.biggId).name}
           </div>
           <MultiSlider
             min={0}

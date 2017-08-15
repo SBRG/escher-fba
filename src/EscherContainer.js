@@ -71,7 +71,8 @@ class EscherContainer extends Component {
       sliderChange: f => this.props.sliderChange(f, biggId),
       resetReaction: f => this.props.resetReaction(f),
       setObjective: f => this.props.setObjective(f),
-      step: this.props.step
+      step: this.props.step,
+      name: this.props.model.reactions.name
     })
     for (let i = 0, l = this.props.model.reactions.length; i < l; i++) {
       if (this.props.model.reactions[i].id === biggId) {
@@ -83,6 +84,7 @@ class EscherContainer extends Component {
           this.setState({
             isCurrentObjective: true
           })
+          // this.props.map.set_status('Current Objective: ' + biggId)
         } else {
           this.setState({
             isCurrentObjective: false
@@ -99,15 +101,27 @@ class EscherContainer extends Component {
 
     let markerPosition = (this.state.currentFlux + this.state.upperRange) / (2 * (1 + this.state.upperRange))
     let markerLabelStyle = {}
-    if (markerPosition > 0.8875) {
+    if (markerPosition > 0.8875 && markerPosition <= 1) {
       markerLabelStyle = {
         position: 'relative',
         left: -(475 * (markerPosition - 0.8875)) + '%'
       }
-    } else if (markerPosition < 0.075) {
+    } else if (markerPosition < 0.075 && markerPosition >= 0) {
       markerLabelStyle = {
         position: 'relative',
         left: -(450 * (markerPosition - 0.075)) + '%'
+      }
+    } else if (markerPosition > 1) {
+      markerLabelStyle = {
+        position: 'relative',
+        left: '-7400%',
+        color: 'black'
+      }
+    } else if (markerPosition < 0) {
+      markerLabelStyle = {
+        position: 'relative',
+        left: '5250%',
+        color: 'black'
       }
     } else {
       markerLabelStyle = {

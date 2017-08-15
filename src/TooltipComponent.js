@@ -6,7 +6,7 @@ const _ = escher.libs.underscore
 
 const tooltipStyle = {
   'width': '500px',
-  'height': '135px',
+  'height': '185px',
   'border-radius': '2px',
   'border': '1px solid #b58787',
   'padding': '7px',
@@ -102,7 +102,7 @@ function tooltipComponentFactory (getDataFunction) {
     }
 
     handleKeyUp (event, bounds) {
-      if (isNaN(parseInt(event.target.value, 10))) {
+      if (isNaN(parseInt(event.target.value, 10)) && event.target.value !== '.') {
         console.log('Invalid Bounds')
       } else {
         this.state.sliderChange(bounds)
@@ -118,6 +118,12 @@ function tooltipComponentFactory (getDataFunction) {
               // top: this.props.displacement.y,
           }}
           >
+          <div style={{fontSize: '20px', fontWeight: 'bold'}}>
+            {this.state.biggId}
+          </div>
+          <div style={{fontSize: '15px'}}>
+            {this.state.name}
+          </div>
           <MultiSlider
             min={0}
             max={2 * (this.state.upperRange + 1)}
@@ -197,7 +203,7 @@ function tooltipComponentFactory (getDataFunction) {
               style={inputStyle}
               onFocus={this.handleFocus}
               onKeyUp={
-                event => this.handleKeyUp(event, [this.state.upperBound, parseInt(event.target.value, 10)])
+                event => this.handleKeyUp(event, [this.state.lowerBound, parseInt(event.target.value, 10)])
               }
             />
           </div>

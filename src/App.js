@@ -150,7 +150,7 @@ class App extends Component {
           setObjective={(biggId) => this.setObjective(biggId)}
           lowerRange={-25}
           upperRange={25}
-          step={0.5}
+          step={1}
         />
         <button
           className='resetMapButton'

@@ -97,28 +97,19 @@ function tooltipComponentFactory (getDataFunction) {
       return array.map(this.tipConverter.bind(this))
     }
 
-    render () {
-      if (this.state.builder !== null) {
-        const windowTranslate = this.state.builder.zoom_container.window_translate
-        const windowScale = this.state.builder.zoom_container.window_scale
-        const mapSize = this.state.builder.zoom_container.get_size()
-        let x = windowScale * this.state.loc.x + windowTranslate.x
-        let y = windowScale * this.state.loc.y + windowTranslate.y
-        this.base.style.left = 0
-        this.base.style.top = 0
-        if (x + 500 > mapSize.width) {
-          this.base.style.left = -500 + 'px'
-        }
+    handleFocus (event) {
+      event.target.select()
+    }
 
-        if (y + 135 > mapSize.height) {
-          this.base.style.top = -135 + 'px'
-        }
-        console.log(this.base.style.left, x, getDataFunction(this.state.biggId).loc)
-        // // Don't display tooltip for metabolites
-        // if (this.state.type === 'metabolite') {
-        //   return
-        // }
+    handleKeyUp (event, bounds) {
+      if (isNaN(parseInt(event.target.value, 10))) {
+        console.log('Invalid Bounds')
+      } else {
+        this.state.sliderChange(bounds)
       }
+    }
+
+    render () {
       return (
         <div className='Tooltip'
           style={{
@@ -130,6 +121,7 @@ function tooltipComponentFactory (getDataFunction) {
           <MultiSlider
             min={0}
             max={2 * (this.state.upperRange + 1)}
+            step={this.state.step}
             value={[
               getDataFunction(this.state.biggId).lowerBound + 26,
               getDataFunction(this.state.biggId).upperBound + 26
@@ -171,8 +163,9 @@ function tooltipComponentFactory (getDataFunction) {
               name='lowerBound'
               value={this.state.lowerBound}
               style={inputStyle}
-              onChange={
-                event => this.state.sliderChange([parseInt(event.target.value, 10), this.state.upperBound])
+              onFocus={this.handleFocus}
+              onKeyUp={
+                event => this.handleKeyUp(event, [parseInt(event.target.value, 10), this.state.upperBound])
               }
             />
             <button
@@ -202,8 +195,9 @@ function tooltipComponentFactory (getDataFunction) {
               name='upperBound'
               value={this.state.upperBound}
               style={inputStyle}
-              onChange={
-                event => this.state.sliderChange([this.state.lowerBound, parseInt(event.target.value, 10)])
+              onFocus={this.handleFocus}
+              onKeyUp={
+                event => this.handleKeyUp(event, [this.state.upperBound, parseInt(event.target.value, 10)])
               }
             />
           </div>

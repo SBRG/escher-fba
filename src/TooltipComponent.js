@@ -47,22 +47,12 @@ function tooltipComponentFactory (getDataFunction) {
   return class TooltipComponent extends Component {
     constructor (props) {
       super(props)
-      this.state = {
-        lowerBound: null,
-        upperBound: null,
-        currentFlux: null
-      }
+      let newState = getDataFunction(props.biggId)
+      this.state = newState
     }
 
     componentDidMount () {
       this.props.callbackManager.set('setState', this.setState.bind(this))
-    }
-
-    componentWillReceiveProps (nextProps) {
-      this.setState({
-        lowerBound: this.nextProps.lowerBound,
-        upperBound: this.nextProps.upperBound
-      })
     }
 
     /**
@@ -76,9 +66,9 @@ function tooltipComponentFactory (getDataFunction) {
     fluxConverter (value) {
       return value < this.props.lowerRange // Add parenthesis for better readability
         ? -1000
-        : value > this.props.upperRange
+        : value > getDataFunction(this.state.biggId).upperRange
         ? 1000
-        : value + (this.props.upperRange + 1)
+        : value + (getDataFunction(this.state.biggId).upperRange + 1)
     }
 
     /**
@@ -92,9 +82,9 @@ function tooltipComponentFactory (getDataFunction) {
     tipConverter (value) {
       return value === 0
       ? -1000
-      : value === (2 * (this.props.upperRange + 1))
+      : value === (2 * (getDataFunction(this.state.biggId).upperRange + 1))
       ? 1000
-      : value - (this.props.upperRange + 1)
+      : value - (getDataFunction(this.state.biggId).upperRange + 1)
     }
 
     /**
@@ -107,50 +97,28 @@ function tooltipComponentFactory (getDataFunction) {
       return array.map(this.tipConverter.bind(this))
     }
 
-    /**
-     * Event listener for App's resetReaction method. Sends current BiGG ID up to
-     * EscherContainer and sets local lower and upper bound state.
-     * @param {string} biggId - The BiGG ID of the reaction.
-     */
-    resetReaction (biggId) {
-      this.props.resetReaction(biggId)
-      this.setState({
-        lowerBound: this.props.oldLowerBound,
-        upperBound: this.props.oldUpperBound
-      })
-    }
-
-    /**
-     * Handles all changes to the reaction made within the tooltip itself. First
-     * passes the new values up the hierarchy then sets the internal state.
-     * @param {number[]} bounds - The new lower and upper bounds, respectively, of
-     * the reaction.
-     */
-    sliderChange (bounds) {
-      this.props.sliderChange(bounds)
-      // Eventually will remove state setting when tooltips are fully reactive
-      this.setState({
-        lowerBound: bounds[0],
-        upperBound: bounds[1]
-      })
-    }
-
-    /**
-     * Handler for the bound input fields. Extracts the field's name from
-     * event.target and uses it to decide which bound to modify before passing the
-     * changes up the hierarchy.
-     * @param {Object} event - Reference to the onChange event of the input field.
-     */
-    handleInputChange (event) {
-      this.setState({
-        [event.target.name]: parseInt(event.target.value, 10)
-      })
-      this.props.sliderChange([this.state.lowerBound, this.state.upperBound])
-    }
-
     render () {
-      const { lowerBound, upperBound } = getDataFunction(this.state.biggId)
-      //  console.log('Rendering Tooltip', this.props)
+      if (this.state.builder !== null) {
+        const windowTranslate = this.state.builder.zoom_container.window_translate
+        const windowScale = this.state.builder.zoom_container.window_scale
+        const mapSize = this.state.builder.zoom_container.get_size()
+        let x = windowScale * this.state.loc.x + windowTranslate.x
+        let y = windowScale * this.state.loc.y + windowTranslate.y
+        this.base.style.left = 0
+        this.base.style.top = 0
+        if (x + 500 > mapSize.width) {
+          this.base.style.left = -500 + 'px'
+        }
+
+        if (y + 135 > mapSize.height) {
+          this.base.style.top = -135 + 'px'
+        }
+        console.log(this.base.style.left, x, getDataFunction(this.state.biggId).loc)
+        // // Don't display tooltip for metabolites
+        // if (this.state.type === 'metabolite') {
+        //   return
+        // }
+      }
       return (
         <div className='Tooltip'
           style={{
@@ -161,20 +129,20 @@ function tooltipComponentFactory (getDataFunction) {
           >
           <MultiSlider
             min={0}
-            max={2 * (this.props.upperRange + 1)}
+            max={2 * (this.state.upperRange + 1)}
             value={[
-              this.state.lowerBound + 26,
-              this.state.upperBound + 26
+              getDataFunction(this.state.biggId).lowerBound + 26,
+              getDataFunction(this.state.biggId).upperBound + 26
             ]}
             tipFormatter={f => this.tipConverter(f)}
             allowCross={false}
             pushable={0}
-            onChange={_.throttle(f => this.sliderChange(this.boundConverter(f)))}
-            onAfterChange={f => this.sliderChange(this.boundConverter(f))}
-            marks={{ [this.state.currentFlux]: <div style={markerStyle}>
+            onChange={_.throttle(f => this.state.sliderChange(this.boundConverter(f)))}
+            onAfterChange={f => this.state.sliderChange(this.boundConverter(f))}
+            marks={{ [this.fluxConverter(getDataFunction(this.state.biggId).currentFlux)]: <div style={markerStyle}>
               <div style={{fontSize: '20px'}}>&#11014;</div>
-              <div style={this.props.markerLabelStyle}>
-                Current Flux: {[escher.data_styles.text_for_data([this.tipConverter(this.state.currentFlux)], true)]}
+              <div style={this.state.markerLabelStyle}>
+                Current Flux: {this.state.data}
               </div>
             </div> } //  Define outside of return function
             }
@@ -203,27 +171,29 @@ function tooltipComponentFactory (getDataFunction) {
               name='lowerBound'
               value={this.state.lowerBound}
               style={inputStyle}
-              onChange={this.handleInputChange.bind(this)}
+              onChange={
+                event => this.state.sliderChange([parseInt(event.target.value, 10), this.state.upperBound])
+              }
             />
             <button
               className='knockoutButton'
-              onClick={() => this.sliderChange([0, 0])}
+              onClick={() => this.state.sliderChange([0, 0])}
               style={buttonStyle}
             >
               Knockout Reaction
             </button>
             <button
               className='resetReactionButton'
-              onClick={() => this.resetReaction(this.props.biggId)}
+              onClick={() => this.state.resetReaction(this.state.biggId)}
               style={buttonStyle}
             >
               Reset
             </button>
             <button
               className='objectiveButton'
-              onClick={() => this.props.setObjective(this.props.biggId)}
-              disabled={this.props.isCurrentObjective}
-              style={this.props.isCurrentObjective ? disabledStyle : buttonStyle}
+              onClick={() => this.state.setObjective(this.state.biggId)}
+              disabled={this.state.isCurrentObjective}
+              style={this.state.isCurrentObjective ? disabledStyle : buttonStyle}
             >
               Set Objective
             </button>
@@ -232,7 +202,9 @@ function tooltipComponentFactory (getDataFunction) {
               name='upperBound'
               value={this.state.upperBound}
               style={inputStyle}
-              onChange={this.handleInputChange.bind(this)}
+              onChange={
+                event => this.state.sliderChange([this.state.lowerBound, parseInt(event.target.value, 10)])
+              }
             />
           </div>
         </div>

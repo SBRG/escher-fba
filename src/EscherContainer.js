@@ -1,4 +1,4 @@
-import { h, Component, render } from 'preact'
+import { h, Component } from 'preact'
 import * as escher from 'escher-vis'
 import 'escher-vis/css/dist/builder.css'
 import tooltipComponentFactory from './TooltipComponent.js'
@@ -13,8 +13,8 @@ class EscherContainer extends Component {
       builder: null,
       isCurrentObjective: false,
       koMarkersSel: null,
-      lowerRange: -25,
-      upperRange: 25
+      lowerRange: this.props.lowerRange,
+      upperRange: this.props.upperRange
     }
   }
 
@@ -26,6 +26,7 @@ class EscherContainer extends Component {
       console.warn('Builder not loaded yet')
       return
     }
+
     // console.log('Setting reaction data')
     this.state.builder.set_reaction_data(nextProps.reactionData)
   }
@@ -59,16 +60,68 @@ class EscherContainer extends Component {
     g.append('rect')
       .style('fill', 'red')
   }
-
+  /**
+   * Used to remotely set the state of the tooltip component.
+   * @param {string} biggId - The BiGG ID of the reaction.
+   */
   getData (biggId) {
-    // returns data for tooltip component
-    return this.props
+    // Get attributes from reaction
+    // see story on indexing objects by bigg id
+    this.setState({
+      sliderChange: f => this.props.sliderChange(f, biggId),
+      resetReaction: f => this.props.resetReaction(f),
+      setObjective: f => this.props.setObjective(f)
+    })
+    for (let i = 0, l = this.props.model.reactions.length; i < l; i++) {
+      if (this.props.model.reactions[i].id === biggId) {
+        this.setState({
+          lowerBound: this.props.model.reactions[i].lower_bound,
+          upperBound: this.props.model.reactions[i].upper_bound
+        })
+        if (this.props.currentObjective === biggId) {
+          this.setState({
+            isCurrentObjective: true
+          })
+        } else {
+          this.setState({
+            isCurrentObjective: false
+          })
+        }
+        if (this.props.reactionData !== null) {
+          this.setState({
+            currentFlux: this.props.reactionData[biggId]
+          })
+        }
+        break
+      }
+    }
+
+    let markerPosition = (this.state.currentFlux + this.state.upperRange) / (2 * (1 + this.state.upperRange))
+    let markerLabelStyle = {}
+    if (markerPosition > 0.8875) {
+      markerLabelStyle = {
+        position: 'relative',
+        left: -(475 * (markerPosition - 0.8875)) + '%'
+      }
+    } else if (markerPosition < 0.075) {
+      markerLabelStyle = {
+        position: 'relative',
+        left: -(450 * (markerPosition - 0.075)) + '%'
+      }
+    } else {
+      markerLabelStyle = {
+        position: 'relative'
+      }
+    }
+
+    this.setState({markerLabelStyle: markerLabelStyle})
+    return this.state
   }
 
   componentDidMount () {
     // need a story to fix the first_load_callback
     const builder = new Builder(this.props.map, this.props.model, null, this.base, {
-      // fill_screen: true,
+      fill_screen: true,
       // first_load_callback: function () { this.kosAddGroup(this) },
       enable_keys: false,
       tooltip_component: tooltipComponentFactory(this.getData.bind(this))
@@ -131,43 +184,6 @@ class EscherContainer extends Component {
     //         break
     //       }
     //     }
-
-    //     let markerPosition = (currentFlux + this.state.upperRange) / (2 * (1 + this.state.upperRange))
-    //     let markerLabelStyle = {}
-    //     if (markerPosition > 0.8875) {
-    //       markerLabelStyle = {
-    //         position: 'relative',
-    //         left: -(500 * (markerPosition - 0.8875)) + '%'
-    //       }
-    //     } else if (markerPosition < 0.075) {
-    //       markerLabelStyle = {
-    //         position: 'relative',
-    //         left: -(500 * (markerPosition - 0.075)) + '%'
-    //       }
-    //     } else {
-    //       markerLabelStyle = {
-    //         position: 'relative'
-    //       }
-    //     }
-
-    //     render(
-    //       <TooltipComponent
-    //         //  would work better if we could use: displacement={{x: -100, y: 200}}
-    //         lowerBound={lowerBound}
-    //         upperBound={upperBound}
-    //         oldLowerBound={oldLowerBound}
-    //         oldUpperBound={oldUpperBound}
-    //         biggId={biggId}
-    //         currentFlux={currentFlux}
-    //         isCurrentObjective={this.state.isCurrentObjective}
-    //         sliderChange={f => this.props.sliderChange(f, state.biggId)}
-    //         resetReaction={biggId => this.props.resetReaction(biggId)}
-    //         setObjective={biggId => this.props.setObjective(biggId)}
-    //         lowerRange={this.state.lowerRange}
-    //         upperRange={this.state.upperRange}
-    //         markerLabelStyle={markerLabelStyle}
-    //       />,
-    //     el)
     //   }
     // })
   }

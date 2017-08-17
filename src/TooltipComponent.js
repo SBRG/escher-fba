@@ -4,9 +4,13 @@ import 'preact-range-slider/assets/index.css'
 import * as escher from 'escher-vis'
 const _ = escher.libs.underscore
 
+const WIDTH = 500
+const HEIGHT = 185
+// or: import { WIDTH } from './constants'
+
 const tooltipStyle = {
-  'width': '500px',
-  'height': '185px',
+  'width': WIDTH + 'px',
+  'height': HEIGHT + 'px',
   'border-radius': '2px',
   'border': '1px solid #b58787',
   'padding': '7px',
@@ -29,6 +33,7 @@ const buttonStyle = {
 }
 const markerStyle = {
   'margin-left': '-50%',
+  color: 'black',
   width: '100%'
 }
 const disabledStyle = {
@@ -53,6 +58,11 @@ function tooltipComponentFactory (getDataFunction) {
 
     componentDidMount () {
       this.props.callbackManager.set('setState', this.setState.bind(this))
+      this.props.callbackManager.run('attachGetSize', null, this.getSize.bind(this))
+    }
+
+    getSize () {
+      return {width: WIDTH, height: HEIGHT}
     }
 
     /**
@@ -64,11 +74,11 @@ function tooltipComponentFactory (getDataFunction) {
      * slider.
      */
     fluxConverter (value) {
-      return value < this.props.lowerRange // Add parenthesis for better readability
+      return value < this.state.lowerRange // Add parenthesis for better readability
         ? -1000
-        : value > getDataFunction(this.state.biggId).upperRange
+        : value > this.state.upperRange
         ? 1000
-        : value + (getDataFunction(this.state.biggId).upperRange + 1)
+        : value + this.state.upperRange + 1
     }
 
     /**
@@ -80,11 +90,15 @@ function tooltipComponentFactory (getDataFunction) {
      * relevant value.
      */
     tipConverter (value) {
+      let sigFig = 0
+      if (this.state.step < 1) {
+        sigFig = Math.ceil(-Math.log10(this.state.step))
+      }
       return value === 0
       ? -1000
-      : value === (2 * (getDataFunction(this.state.biggId).upperRange + 1))
+      : value === (2 * (this.state.upperRange + 1))
       ? 1000
-      : value - (getDataFunction(this.state.biggId).upperRange + 1)
+      : parseFloat((value - (this.state.upperRange + 1)).toFixed(sigFig))
     }
 
     /**
@@ -101,43 +115,53 @@ function tooltipComponentFactory (getDataFunction) {
       event.target.select()
     }
 
+    handleMarkerPosition (currentFlux) {
+      return currentFlux < this.state.lowerRange // Add parenthesis for better readability
+        ? 0
+        : currentFlux > this.state.upperRange
+        ? 2 * (this.state.upperRange + 1)
+        : currentFlux + this.state.upperRange + 1
+    }
+
     handleKeyUp (event, bounds) {
-      if (isNaN(parseInt(event.target.value, 10)) && event.target.value !== '.') {
+      if (isNaN(parseFloat(event.target.value)) && event.keyCode !== 190 && event.keyCode !== 110) {
         console.log('Invalid Bounds')
+      } else if (event.keyCode === 190 || event.keyCode === 110 || event.target.value === '-0') {
+        event.preventDefault()
+        event.stopPropagation()
       } else {
-        this.state.sliderChange(bounds)
+        this.state.sliderChange(bounds.map(parseFloat))
       }
     }
 
     render () {
+      const stateData = getDataFunction(this.state.biggId)
       return (
         <div className='Tooltip'
           style={{
             ...tooltipStyle
-              // left: this.props.displacement.x,
-              // top: this.props.displacement.y,
           }}
           >
           <div style={{fontSize: '20px', fontWeight: 'bold'}}>
             {this.state.biggId}
           </div>
           <div style={{fontSize: '15px'}}>
-            {getDataFunction(this.state.biggId).name}
+            {stateData.name}
           </div>
           <MultiSlider
             min={0}
             max={2 * (this.state.upperRange + 1)}
             step={this.state.step}
             value={[
-              getDataFunction(this.state.biggId).lowerBound + 26,
-              getDataFunction(this.state.biggId).upperBound + 26
+              stateData.lowerBound + 26,
+              stateData.upperBound + 26
             ]}
             tipFormatter={f => this.tipConverter(f)}
             allowCross={false}
             pushable={0}
             onChange={_.throttle(f => this.state.sliderChange(this.boundConverter(f)))}
             onAfterChange={f => this.state.sliderChange(this.boundConverter(f))}
-            marks={{ [this.fluxConverter(getDataFunction(this.state.biggId).currentFlux)]: <div style={markerStyle}>
+            marks={{ [this.handleMarkerPosition(stateData.currentFlux)]: <div style={markerStyle}>
               <div style={{fontSize: '20px'}}>&#11014;</div>
               <div style={this.state.markerLabelStyle}>
                 Current Flux: {this.state.data}
@@ -171,7 +195,7 @@ function tooltipComponentFactory (getDataFunction) {
               style={inputStyle}
               onFocus={this.handleFocus}
               onKeyUp={
-                event => this.handleKeyUp(event, [parseInt(event.target.value, 10), this.state.upperBound])
+                event => this.handleKeyUp(event, [event.target.value, this.state.upperBound])
               }
             />
             <button
@@ -203,7 +227,7 @@ function tooltipComponentFactory (getDataFunction) {
               style={inputStyle}
               onFocus={this.handleFocus}
               onKeyUp={
-                event => this.handleKeyUp(event, [this.state.lowerBound, parseInt(event.target.value, 10)])
+                event => this.handleKeyUp(event, [this.state.lowerBound, event.target.value])
               }
             />
           </div>

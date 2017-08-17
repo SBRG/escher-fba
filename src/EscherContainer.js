@@ -29,6 +29,9 @@ class EscherContainer extends Component {
 
     // console.log('Setting reaction data')
     this.state.builder.set_reaction_data(nextProps.reactionData)
+    this.state.builder.map.set_status(
+      `<div>Current Objective: ${this.props.currentObjective}</div>
+      <div>Flux Through Objective: ${this.state.currentFlux}</div>`)
   }
 
   kosAddGroup (builder) {
@@ -67,6 +70,7 @@ class EscherContainer extends Component {
   getData (biggId) {
     // Get attributes from reaction
     // see story on indexing objects by bigg id
+    // console.log('Running') //  Tracks getData being called
     this.setState({
       sliderChange: f => this.props.sliderChange(f, biggId),
       resetReaction: f => this.props.resetReaction(f),
@@ -100,8 +104,11 @@ class EscherContainer extends Component {
     }
 
     let markerPosition = (this.state.currentFlux + this.state.upperRange) / (2 * (1 + this.state.upperRange))
-    let markerLabelStyle = {}
-    if (markerPosition > 0.8875 && markerPosition <= 1) {
+    let markerLabelStyle = {
+      position: 'relative',
+      color: 'black'
+    }
+    if (markerPosition > 0.8875 && markerPosition < 0.963) {
       markerLabelStyle = {
         position: 'relative',
         left: -(475 * (markerPosition - 0.8875)) + '%'
@@ -111,25 +118,18 @@ class EscherContainer extends Component {
         position: 'relative',
         left: -(450 * (markerPosition - 0.075)) + '%'
       }
-    } else if (markerPosition > 1) {
+    } else if (markerPosition >= 0.963) {
       markerLabelStyle = {
         position: 'relative',
-        left: '-7400%',
-        color: 'black'
+        left: -45 + '%'
       }
     } else if (markerPosition < 0) {
       markerLabelStyle = {
         position: 'relative',
-        left: '5250%',
-        color: 'black'
-      }
-    } else {
-      markerLabelStyle = {
-        position: 'relative'
+        left: 42.5 + '%'
       }
     }
-
-    this.setState({markerLabelStyle: markerLabelStyle})
+    this.setState({markerLabelStyle})
     return this.state
   }
 
@@ -137,7 +137,14 @@ class EscherContainer extends Component {
     // need a story to fix the first_load_callback
     const builder = new Builder(this.props.map, this.props.model, null, this.base, {
       fill_screen: true,
-      // first_load_callback: function () { this.kosAddGroup(this) },
+      // first_load_callback: builder => {
+      //   builder.selection.select('.menu').selectAll('button').each(function () => {
+      //     if (button.text === 'Load reaction data') {
+      //       this.style('color', 'grey')
+      //       this.attr('disabled', true)
+      //     }
+      //   })
+      // },
       enable_keys: false,
       tooltip_component: tooltipComponentFactory(this.getData.bind(this))
     })

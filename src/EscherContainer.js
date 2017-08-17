@@ -29,9 +29,11 @@ class EscherContainer extends Component {
 
     // console.log('Setting reaction data')
     this.state.builder.set_reaction_data(nextProps.reactionData)
-    this.state.builder.map.set_status(
+    if (this.props.reactionData !== undefined) {
+      this.state.builder.map.set_status(
       `<div>Current Objective: ${this.props.currentObjective}</div>
-      <div>Flux Through Objective: ${this.state.currentFlux}</div>`)
+      <div>Flux Through Objective: ${this.props.reactionData[this.props.currentObjective]}</div>`)
+    }
   }
 
   kosAddGroup (builder) {

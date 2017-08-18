@@ -279,8 +279,8 @@ function tooltipComponentFactory (getDataFunction) {
               onMouseUp={this.mouseUp.bind(this)}
               onMouseLeave={this.mouseUp.bind(this)}
               onClick={() => this.state.setObjective(this.state.biggId)}
-              disabled={this.state.isCurrentObjective}
-              style={this.state.isCurrentObjective ? disabledStyle : this.state.objectiveButton}
+              disabled={stateData.isCurrentObjective}
+              style={stateData.isCurrentObjective ? disabledStyle : this.state.objectiveButton}
             >
               Set Objective
             </button>

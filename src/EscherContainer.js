@@ -29,11 +29,6 @@ class EscherContainer extends Component {
 
     // console.log('Setting reaction data')
     this.state.builder.set_reaction_data(nextProps.reactionData)
-    if (this.props.reactionData !== undefined) {
-      this.state.builder.map.set_status(
-      `<div>Current Objective: ${this.props.currentObjective}</div>
-      <div>Flux Through Objective: ${this.props.reactionData[this.props.currentObjective]}</div>`)
-    }
   }
 
   kosAddGroup (builder) {
@@ -77,8 +72,17 @@ class EscherContainer extends Component {
       sliderChange: f => this.props.sliderChange(f, biggId),
       resetReaction: f => this.props.resetReaction(f),
       setObjective: f => this.props.setObjective(f),
+      isAlive: this.props.reactionData !== null,
       step: this.props.step
     })
+    // const newState = {
+    //   sliderChange: f => this.props.sliderChange(f, biggId),
+    //   resetReaction: f => this.props.resetReaction(f),
+    //   setObjective: f => this.props.setObjective(f),
+    //   isAlive: this.props.reactionData !== null,
+    //   step: this.props.step,
+    //   isCurrentObjective: ,
+    // }
     for (let i = 0, l = this.props.model.reactions.length; i < l; i++) {
       if (this.props.model.reactions[i].id === biggId) {
         this.setState({
@@ -108,7 +112,11 @@ class EscherContainer extends Component {
     let markerPosition = (this.state.currentFlux + this.state.upperRange) / (2 * (1 + this.state.upperRange))
     let markerLabelStyle = {
       position: 'relative',
-      color: 'black'
+      color: 'black',
+      visibility: 'visible'
+    }
+    let indicatorStyle = {
+      visibility: 'visible'
     }
     if (markerPosition > 0.8875 && markerPosition < 0.963) {
       markerLabelStyle = {
@@ -130,8 +138,20 @@ class EscherContainer extends Component {
         position: 'relative',
         left: 42.5 + '%'
       }
+    } else if (this.props.reactionData === null) {
+      markerLabelStyle = {
+        visibility: 'hidden'
+      }
+      indicatorStyle = {
+        visibility: 'hidden'
+      }
     }
-    this.setState({markerLabelStyle})
+    this.setState({markerLabelStyle, indicatorStyle})
+    if (this.state.builder !== null && this.props.reactionData !== null) {
+      this.state.builder.map.set_status(
+        `<div>Current Objective: ${this.props.currentObjective}</div>
+        <div>Flux Through Objective: ${(this.props.reactionData[this.props.currentObjective]).toFixed(2)}</div>`)
+    }
     return this.state
   }
 
@@ -151,6 +171,11 @@ class EscherContainer extends Component {
       tooltip_component: tooltipComponentFactory(this.getData.bind(this))
     })
     this.setState({ builder })
+    setTimeout(() => {
+      this.state.builder.map.set_status(
+      `<div>Current Objective: ${this.props.currentObjective}</div>
+      <div>Flux Through Objective: ${(this.props.reactionData[this.props.currentObjective]).toFixed(2)}</div>`)
+    }, 500)
   }
 
   render () {

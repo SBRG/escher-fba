@@ -9,55 +9,90 @@ const HEIGHT = 185
 // or: import { WIDTH } from './constants'
 
 const tooltipStyle = {
-  'width': WIDTH + 'px',
-  'height': HEIGHT + 'px',
-  'border-radius': '2px',
-  'border': '1px solid #b58787',
-  'padding': '7px',
-  'background-color': '#fff',
-  'text-align': 'left',
-  'font-size': '16px',
-  'font-family': 'sans-serif',
-  'color': '#111',
-  'box-shadow': '4px 6px 20px 0px rgba(0, 0, 0, 0.4)',
-  'position': 'relative'
+  width: WIDTH + 'px',
+  height: HEIGHT + 'px',
+  borderRadius: '2px',
+  border: '1px solid #b58787',
+  padding: '7px',
+  backgroundColor: '#fff',
+  textAlign: 'left',
+  fontSize: '16px',
+  fontFamily: 'sans-serif',
+  color: '#111',
+  boxShadow: '4px 6px 20px 0px rgba(0, 0, 0, 0.4)',
+  position: 'relative'
 }
 const interfacePanelStyle = {
-  'margin-top': '55px',
-  'margin-left': '0%'
+  marginTop: '55px',
+  marginLeft: '0%'
 }
 const buttonStyle = {
-  'margin-left': '2.5%',
-  'margin-top': '-10px',
-  clear: 'both'
+  marginLeft: '2.625%',
+  marginTop: '-10px',
+  color: 'white',
+  clear: 'both',
+  border: '1px solid #2E2F2F',
+  backgroundImage: 'linear-gradient(#4F5151, #474949 6%, #3F4141)',
+  backgroundColor: '#474949',
+  borderColor: '#474949',
+  lineHeight: '1.42857143',
+  borderRadius: '4px',
+  textAlign: 'center',
+  verticalAlign: 'middle',
+  cursor: 'pointer'
+}
+const pushedButton = {
+  ...buttonStyle,
+  backgroundImage: 'linear-gradient(#3F4141, #474949 6%, #4F5151)'
 }
 const markerStyle = {
-  'margin-left': '-50%',
+  marginLeft: '-50%',
   color: 'black',
   width: '100%'
 }
 const disabledStyle = {
-  'margin-left': '2.5%',
-  'color': 'graytext',
+  ...buttonStyle,
+  color: 'graytext',
+  backgroundImage: 'linear-gradient(#D8D8D8, #D8D8D8)',
   clear: 'both'
 }
 const inputStyle = {
   ...buttonStyle,
   maxWidth: '47px',
   textAlign: 'center',
-  clear: 'both'
+  clear: 'both',
+  cursor: 'text'
 }
 
 function tooltipComponentFactory (getDataFunction) {
   return class TooltipComponent extends Component {
     constructor (props) {
       super(props)
-      let newState = getDataFunction(props.biggId)
-      this.state = newState
+      const newState = getDataFunction(props.biggId)
+      this.state = {
+        ...newState,
+        lowerBoundString: '',
+        upperBoundString: ''
+      }
     }
 
     componentDidMount () {
-      this.props.callbackManager.set('setState', this.setState.bind(this))
+      this.props.callbackManager.set('setState', newState => {
+        const data = getDataFunction(newState.biggId)
+        this.setState({
+          ...newState,
+          ...data,
+          lowerBoundString: parseFloat(this.state.lowerBoundString) === data.lowerBound
+            ? this.state.lowerBoundString
+            : data.lowerBound.toString(),
+          upperBoundString: parseFloat(this.state.upperBoundString) === data.upperBound
+          ? this.state.upperBoundString
+          : data.upperBound.toString(),
+          knockoutButton: buttonStyle,
+          resetReactionButton: buttonStyle,
+          objectiveButton: buttonStyle
+        })
+      })
       this.props.callbackManager.run('attachGetSize', null, this.getSize.bind(this))
     }
 
@@ -115,27 +150,45 @@ function tooltipComponentFactory (getDataFunction) {
       event.target.select()
     }
 
+    mouseDown (event) {
+      this.setState({
+        [event.target.name]: pushedButton
+      })
+    }
+
+    mouseUp (event) {
+      this.setState({
+        [event.target.name]: buttonStyle
+      })
+    }
+
     handleMarkerPosition (currentFlux) {
-      return currentFlux < this.state.lowerRange // Add parenthesis for better readability
-        ? 0
-        : currentFlux > this.state.upperRange
-        ? 2 * (this.state.upperRange + 1)
-        : currentFlux + this.state.upperRange + 1
+      if (this.state.isAlive) {
+        return currentFlux < this.state.lowerRange // Add parenthesis for better readability
+          ? 0
+          : currentFlux > this.state.upperRange
+          ? 2 * (this.state.upperRange + 1)
+          : currentFlux + this.state.upperRange + 1
+      } else {
+        return this.state.upperRange + 1
+      }
     }
 
     handleKeyUp (event, bounds) {
-      if (isNaN(parseFloat(event.target.value)) && event.keyCode !== 190 && event.keyCode !== 110) {
+      this.setState({
+        lowerBoundString: bounds[0],
+        upperBoundString: bounds[1]
+      })
+      if (isNaN(parseFloat(event.target.value))) {
         console.log('Invalid Bounds')
-      } else if (event.keyCode === 190 || event.keyCode === 110 || event.target.value === '-0') {
-        event.preventDefault()
-        event.stopPropagation()
       } else {
-        this.state.sliderChange(bounds.map(parseFloat))
+        this.state.sliderChange([parseFloat(this.state.lowerBoundString), parseFloat(this.state.upperBoundString)])
       }
     }
 
     render () {
       const stateData = getDataFunction(this.state.biggId)
+      // const this.state = this.state.data
       return (
         <div className='Tooltip'
           style={{
@@ -145,16 +198,16 @@ function tooltipComponentFactory (getDataFunction) {
           <div style={{fontSize: '20px', fontWeight: 'bold'}}>
             {this.state.biggId}
           </div>
-          <div style={{fontSize: '15px'}}>
-            {stateData.name}
+          <div style={{fontSize: '15px', marginBottom: '6px'}}>
+            {this.state.name}
           </div>
           <MultiSlider
             min={0}
             max={2 * (this.state.upperRange + 1)}
             step={this.state.step}
             value={[
-              stateData.lowerBound + 26,
-              stateData.upperBound + 26
+              this.state.lowerBound + 26,
+              this.state.upperBound + 26
             ]}
             tipFormatter={f => this.tipConverter(f)}
             allowCross={false}
@@ -162,7 +215,7 @@ function tooltipComponentFactory (getDataFunction) {
             onChange={_.throttle(f => this.state.sliderChange(this.boundConverter(f)))}
             onAfterChange={f => this.state.sliderChange(this.boundConverter(f))}
             marks={{ [this.handleMarkerPosition(stateData.currentFlux)]: <div style={markerStyle}>
-              <div style={{fontSize: '20px'}}>&#11014;</div>
+              <div style={{...this.state.indicatorStyle, fontSize: '20px'}}>&#11014;</div>
               <div style={this.state.markerLabelStyle}>
                 Current Flux: {this.state.data}
               </div>
@@ -191,7 +244,7 @@ function tooltipComponentFactory (getDataFunction) {
             <input
               type='text'
               name='lowerBound'
-              value={this.state.lowerBound}
+              value={this.state.lowerBoundString}
               style={inputStyle}
               onFocus={this.handleFocus}
               onKeyUp={
@@ -199,31 +252,42 @@ function tooltipComponentFactory (getDataFunction) {
               }
             />
             <button
-              className='knockoutButton'
-              onClick={() => this.state.sliderChange([0, 0])}
-              style={buttonStyle}
+              name='knockoutButton'
+              onMouseDown={this.mouseDown.bind(this)}
+              onMouseUp={this.mouseUp.bind(this)}
+              onMouseLeave={this.mouseUp.bind(this)}
+              onClick={
+                () => this.state.sliderChange([0, 0])
+              }
+              style={this.state.knockoutButton}
             >
               Knockout Reaction
             </button>
             <button
-              className='resetReactionButton'
+              name='resetReactionButton'
+              onMouseDown={this.mouseDown.bind(this)}
+              onMouseUp={this.mouseUp.bind(this)}
+              onMouseLeave={this.mouseUp.bind(this)}
               onClick={() => this.state.resetReaction(this.state.biggId)}
-              style={buttonStyle}
+              style={this.state.resetReactionButton}
             >
               Reset
             </button>
             <button
-              className='objectiveButton'
+              name='objectiveButton'
+              onMouseDown={this.mouseDown.bind(this)}
+              onMouseUp={this.mouseUp.bind(this)}
+              onMouseLeave={this.mouseUp.bind(this)}
               onClick={() => this.state.setObjective(this.state.biggId)}
               disabled={this.state.isCurrentObjective}
-              style={this.state.isCurrentObjective ? disabledStyle : buttonStyle}
+              style={this.state.isCurrentObjective ? disabledStyle : this.state.objectiveButton}
             >
               Set Objective
             </button>
             <input
               type='text'
               name='upperBound'
-              value={this.state.upperBound}
+              value={this.state.upperBoundString}
               style={inputStyle}
               onFocus={this.handleFocus}
               onKeyUp={

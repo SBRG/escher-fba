@@ -1,3 +1,4 @@
+/** @jsx h */
 import { h, Component } from 'preact'
 import './App.css'
 import 'preact-range-slider/assets/index.css'

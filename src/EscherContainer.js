@@ -1,3 +1,4 @@
+/** @jsx h */
 import { h, Component } from 'preact'
 import * as escher from 'escher-vis'
 import 'escher-vis/css/dist/builder.css'
@@ -10,11 +11,7 @@ class EscherContainer extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      builder: null,
-      isCurrentObjective: false,
-      koMarkersSel: null,
-      lowerRange: this.props.lowerRange,
-      upperRange: this.props.upperRange
+      builder: null
     }
   }
 
@@ -64,95 +61,99 @@ class EscherContainer extends Component {
    * Used to remotely set the state of the tooltip component.
    * @param {string} biggId - The BiGG ID of the reaction.
    */
-  getData (biggId) {
+  getProps (biggId) {
     // Get attributes from reaction
     // see story on indexing objects by bigg id
     // console.log('Running') //  Tracks getData being called
-    this.setState({
-      sliderChange: f => this.props.sliderChange(f, biggId),
-      resetReaction: f => this.props.resetReaction(f),
-      setObjective: f => this.props.setObjective(f),
-      isAlive: this.props.reactionData !== null,
-      step: this.props.step
-    })
-    // const newState = {
+    // this.setState({
     //   sliderChange: f => this.props.sliderChange(f, biggId),
     //   resetReaction: f => this.props.resetReaction(f),
     //   setObjective: f => this.props.setObjective(f),
     //   isAlive: this.props.reactionData !== null,
     //   step: this.props.step,
-    //   isCurrentObjective: ,
-    // }
-    for (let i = 0, l = this.props.model.reactions.length; i < l; i++) {
-      if (this.props.model.reactions[i].id === biggId) {
-        this.setState({
-          lowerBound: this.props.model.reactions[i].lower_bound,
-          upperBound: this.props.model.reactions[i].upper_bound,
-          name: this.props.model.reactions[i].name
-        })
-        if (this.props.currentObjective === biggId) {
-          this.setState({
-            isCurrentObjective: true
-          })
-          // this.props.map.set_status('Current Objective: ' + biggId)
-        } else {
-          this.setState({
-            isCurrentObjective: false
-          })
-        }
-        if (this.props.reactionData !== null) {
-          this.setState({
-            currentFlux: this.props.reactionData[biggId]
-          })
-        }
-        break
-      }
+    //   model: this.props.model,
+    //   oldModel: this.props.oldModel,
+    //   reactionData: this.props.reactionData,
+    //   biggId,
+    //   currentObjective: this.props.currentObjective,
+    //   koMarkersSel: null,
+    //   lowerRange: this.props.lowerRange,
+    //   upperRange: this.props.upperRange
+    // })
+    const tooltipProps = {
+      sliderChange: f => this.props.sliderChange(f, biggId),
+      resetReaction: f => this.props.resetReaction(f),
+      setObjective: f => this.props.setObjective(f),
+      isAlive: this.props.reactionData !== null,
+      step: this.props.step,
+      model: this.props.model,
+      oldModel: this.props.oldModel,
+      reactionData: this.props.reactionData,
+      biggId,
+      currentObjective: this.props.currentObjective,
+      koMarkersSel: null,
+      lowerRange: this.props.lowerRange,
+      upperRange: this.props.upperRange,
+      isCurrentObjective: false
     }
+    // for (let i = 0, l = this.props.model.reactions.length; i < l; i++) {
+    //   if (this.props.model.reactions[i].id === biggId) {
+    //     tooltipProps.lowerBound = this.props.model.reactions[i].lower_bound
+    //     tooltipProps.upperBound = this.props.model.reactions[i].upper_bound
+    //     tooltipProps.name = this.props.model.reactions[i].name
+    //     if (this.props.currentObjective === biggId) {
+    //       tooltipProps.isCurrentObjective = true
+    //     }
+    //     if (this.props.reactionData !== null) {
+    //       tooltipProps.currentFlux = this.props.reactionData[biggId]
+    //     }
+    //     break
+    //   }
+    // }
 
-    let markerPosition = (this.state.currentFlux + this.state.upperRange) / (2 * (1 + this.state.upperRange))
-    let markerLabelStyle = {
+    // let markerPosition = (tooltipProps.currentFlux + tooltipProps.upperRange) / (2 * (1 + tooltipProps.upperRange))
+    tooltipProps.markerLabelStyle = {
       position: 'relative',
       color: 'black',
       visibility: 'visible'
     }
-    let indicatorStyle = {
+    tooltipProps.indicatorStyle = {
       visibility: 'visible'
     }
-    if (markerPosition > 0.8875 && markerPosition < 0.963) {
-      markerLabelStyle = {
-        position: 'relative',
-        left: -(475 * (markerPosition - 0.8875)) + '%'
-      }
-    } else if (markerPosition < 0.075 && markerPosition >= 0) {
-      markerLabelStyle = {
-        position: 'relative',
-        left: -(450 * (markerPosition - 0.075)) + '%'
-      }
-    } else if (markerPosition >= 0.963) {
-      markerLabelStyle = {
-        position: 'relative',
-        left: -45 + '%'
-      }
-    } else if (markerPosition < 0) {
-      markerLabelStyle = {
-        position: 'relative',
-        left: 42.5 + '%'
-      }
-    } else if (this.props.reactionData === null) {
-      markerLabelStyle = {
-        visibility: 'hidden'
-      }
-      indicatorStyle = {
-        visibility: 'hidden'
-      }
-    }
-    this.setState({markerLabelStyle, indicatorStyle})
+    // if (markerPosition > 0.8875 && markerPosition < 0.963) {
+    //   tooltipProps.markerLabelStyle = {
+    //     position: 'relative',
+    //     left: -(475 * (markerPosition - 0.8875)) + '%'
+    //   }
+    // } else if (markerPosition < 0.075 && markerPosition >= 0) {
+    //   tooltipProps.markerLabelStyle = {
+    //     position: 'relative',
+    //     left: -(450 * (markerPosition - 0.075)) + '%'
+    //   }
+    // } else if (markerPosition >= 0.963) {
+    //   tooltipProps.markerLabelStyle = {
+    //     position: 'relative',
+    //     left: -45 + '%'
+    //   }
+    // } else if (markerPosition < 0) {
+    //   tooltipProps.markerLabelStyle = {
+    //     position: 'relative',
+    //     left: 42.5 + '%'
+    //   }
+    // } else if (this.props.reactionData === null) {
+    //   tooltipProps.markerLabelStyle = {
+    //     visibility: 'hidden'
+    //   }
+    //   tooltipProps.indicatorStyle = {
+    //     visibility: 'hidden'
+    //   }
+    // }
     if (this.state.builder !== null && this.props.reactionData !== null) {
       this.state.builder.map.set_status(
         `<div>Current Objective: ${this.props.currentObjective}</div>
         <div>Flux Through Objective: ${(this.props.reactionData[this.props.currentObjective]).toFixed(2)}</div>`)
     }
-    return this.state
+    return tooltipProps
   }
 
   componentDidMount () {
@@ -168,7 +169,7 @@ class EscherContainer extends Component {
       //   })
       // },
       enable_keys: false,
-      tooltip_component: tooltipComponentFactory(this.getData.bind(this))
+      tooltip_component: tooltipComponentFactory(this.getProps.bind(this))
     })
     this.setState({ builder })
     setTimeout(() => {

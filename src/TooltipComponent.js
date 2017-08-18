@@ -1,3 +1,4 @@
+/** @jsx h */
 import { h, Component } from 'preact'
 import { MultiSlider } from 'preact-range-slider'
 import 'preact-range-slider/assets/index.css'
@@ -64,34 +65,70 @@ const inputStyle = {
   cursor: 'text'
 }
 
-function tooltipComponentFactory (getDataFunction) {
+function tooltipComponentFactory (getPropsFunction) {
   return class TooltipComponent extends Component {
-    constructor (props) {
-      super(props)
-      const newState = getDataFunction(props.biggId)
+    constructor () {
+      super()
       this.state = {
-        ...newState,
         lowerBoundString: '',
-        upperBoundString: ''
+        upperBoundString: '',
+        markerLabelStyle: {
+          position: 'relative',
+          color: 'black',
+          visibility: 'visible'
+        }
       }
     }
 
-    componentDidMount () {
-      this.props.callbackManager.set('setState', newState => {
-        const data = getDataFunction(newState.biggId)
-        this.setState({
-          ...newState,
-          ...data,
-          lowerBoundString: parseFloat(this.state.lowerBoundString) === data.lowerBound
-            ? this.state.lowerBoundString
-            : data.lowerBound.toString(),
-          upperBoundString: parseFloat(this.state.upperBoundString) === data.upperBound
+    transformAndSetState (escherState, escherFBAState) {
+      if (escherFBAState.lowerBound !== undefined) {
+        //
+        const lowerBoundString = parseFloat(this.state.lowerBoundString) === escherFBAState.lowerBound
+          ? this.state.lowerBoundString
+          : escherFBAState.lowerBound.toString()
+
+        //
+        const upperBoundString = parseFloat(this.state.upperBoundString) === escherFBAState.upperBound
           ? this.state.upperBoundString
-          : data.upperBound.toString(),
+          : escherFBAState.upperBound.toString()
+
+        const fluxData = {}
+
+        for (let i = 0, l = escherFBAState.model.reactions.length; i < l; i++) {
+          if (escherFBAState.model.reactions[i].id === escherState.biggId) {
+            fluxData.lowerBound = escherFBAState.model.reactions[i].lower_bound
+            fluxData.upperBound = escherFBAState.model.reactions[i].upper_bound
+            fluxData.name = escherFBAState.model.reactions[i].name
+            if (escherFBAState.currentObjective === escherState.biggId) {
+              fluxData.isCurrentObjective = true
+            }
+            if (escherFBAState.reactionData !== null) {
+              fluxData.currentFlux = escherFBAState.reactionData[escherState.biggId]
+            }
+            break
+          }
+        }
+
+        console.log(escherState, escherFBAState)
+        this.setState({
+          ...escherState,
+          ...escherFBAState,
+          ...fluxData,
+          lowerBoundString,
+          upperBoundString,
           knockoutButton: buttonStyle,
           resetReactionButton: buttonStyle,
           objectiveButton: buttonStyle
         })
+        console.log(fluxData, this.state)
+      }
+    }
+
+    componentDidMount () {
+      this.props.callbackManager.set('setState', escherState => {
+        const escherFBAState = getPropsFunction(escherState.biggId)
+        this.transformAndSetState(escherState, escherFBAState)
+        console.log(this.escherFBAState)
       })
       this.props.callbackManager.run('attachGetSize', null, this.getSize.bind(this))
     }
@@ -146,10 +183,6 @@ function tooltipComponentFactory (getDataFunction) {
       return array.map(this.tipConverter.bind(this))
     }
 
-    handleFocus (event) {
-      event.target.select()
-    }
-
     mouseDown (event) {
       this.setState({
         [event.target.name]: pushedButton
@@ -187,7 +220,7 @@ function tooltipComponentFactory (getDataFunction) {
     }
 
     render () {
-      const stateData = getDataFunction(this.state.biggId)
+      const stateData = getPropsFunction(this.state.biggId)
       // const this.state = this.state.data
       return (
         <div className='Tooltip'
@@ -214,7 +247,7 @@ function tooltipComponentFactory (getDataFunction) {
             pushable={0}
             onChange={_.throttle(f => this.state.sliderChange(this.boundConverter(f)))}
             onAfterChange={f => this.state.sliderChange(this.boundConverter(f))}
-            marks={{ [this.handleMarkerPosition(stateData.currentFlux)]: <div style={markerStyle}>
+            marks={{ [this.handleMarkerPosition(this.state.currentFlux)]: <div style={markerStyle}>
               <div style={{...this.state.indicatorStyle, fontSize: '20px'}}>&#11014;</div>
               <div style={this.state.markerLabelStyle}>
                 Current Flux: {this.state.data}
@@ -246,7 +279,7 @@ function tooltipComponentFactory (getDataFunction) {
               name='lowerBound'
               value={this.state.lowerBoundString}
               style={inputStyle}
-              onFocus={this.handleFocus}
+              onFocus={(event) => event.target.select()}
               onKeyUp={
                 event => this.handleKeyUp(event, [event.target.value, this.state.upperBound])
               }
@@ -268,7 +301,7 @@ function tooltipComponentFactory (getDataFunction) {
               onMouseDown={this.mouseDown.bind(this)}
               onMouseUp={this.mouseUp.bind(this)}
               onMouseLeave={this.mouseUp.bind(this)}
-              onClick={() => this.state.resetReaction(this.state.biggId)}
+              onClick={() => stateData.resetReaction(this.state.biggId)}
               style={this.state.resetReactionButton}
             >
               Reset
@@ -289,7 +322,7 @@ function tooltipComponentFactory (getDataFunction) {
               name='upperBound'
               value={this.state.upperBoundString}
               style={inputStyle}
-              onFocus={this.handleFocus}
+              onFocus={(event) => event.target.select()}
               onKeyUp={
                 event => this.handleKeyUp(event, [this.state.lowerBound, event.target.value])
               }

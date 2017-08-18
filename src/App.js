@@ -7,15 +7,30 @@ import modelData from './E coli core.json'
 import map from './E coli core.Core metabolism.json'
 
 const buttonStyle = {
-  'position': 'absolute',
-  'right': '2%',
-  'bottom': '2%',
-  'color': 'black'
+  position: 'absolute',
+  right: '2%',
+  bottom: '2%',
+  color: 'white',
+  clear: 'both',
+  border: '1px solid #2E2F2F',
+  backgroundImage: 'linear-gradient(#4F5151, #474949 6%, #3F4141)',
+  backgroundColor: '#474949',
+  borderColor: '#474949',
+  lineHeight: '1.42857143',
+  borderRadius: '4px',
+  textAlign: 'center',
+  cursor: 'pointer'
+}
+
+const pushedButton = {
+  ...buttonStyle,
+  backgroundImage: 'linear-gradient(#3F4141, #474949 6%, #4F5151)'
 }
 
 class App extends Component {
   componentWillMount () {
     this.setState({
+      buttonStyle: buttonStyle,
       model: new Model(modelData),
       oldModel: new Model(modelData),
       currentObjective: 'Biomass_Ecoli_core_w_GAM'
@@ -135,6 +150,18 @@ class App extends Component {
     }
   }
 
+  mouseDown (event) {
+    this.setState({
+      buttonStyle: pushedButton
+    })
+  }
+
+  mouseUp (event) {
+    this.setState({
+      buttonStyle: buttonStyle
+    })
+  }
+
   render () {
     //  console.log('Rendering')
     return (
@@ -154,7 +181,10 @@ class App extends Component {
         />
         <button
           className='resetMapButton'
-          style={buttonStyle}
+          style={this.state.buttonStyle}
+          onMouseDown={this.mouseDown.bind(this)}
+          onMouseUp={this.mouseUp.bind(this)}
+          onMouseLeave={this.mouseUp.bind(this)}
           onClick={() => this.resetMap()}
           >
           Reset Map

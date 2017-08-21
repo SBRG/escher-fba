@@ -23,9 +23,10 @@ class EscherContainer extends Component {
       console.warn('Builder not loaded yet')
       return
     }
-
     // console.log('Setting reaction data')
-    this.state.builder.set_reaction_data(nextProps.reactionData)
+    _.defer(() => {
+      this.state.builder.set_reaction_data(nextProps.reactionData)
+    })
   }
 
   kosAddGroup (builder) {
@@ -96,20 +97,6 @@ class EscherContainer extends Component {
       upperRange: this.props.upperRange,
       isCurrentObjective: false
     }
-    // for (let i = 0, l = this.props.model.reactions.length; i < l; i++) {
-    //   if (this.props.model.reactions[i].id === biggId) {
-    //     tooltipProps.lowerBound = this.props.model.reactions[i].lower_bound
-    //     tooltipProps.upperBound = this.props.model.reactions[i].upper_bound
-    //     tooltipProps.name = this.props.model.reactions[i].name
-    //     if (this.props.currentObjective === biggId) {
-    //       tooltipProps.isCurrentObjective = true
-    //     }
-    //     if (this.props.reactionData !== null) {
-    //       tooltipProps.currentFlux = this.props.reactionData[biggId]
-    //     }
-    //     break
-    //   }
-    // }
 
     // let markerPosition = (tooltipProps.currentFlux + tooltipProps.upperRange) / (2 * (1 + tooltipProps.upperRange))
     tooltipProps.markerLabelStyle = {

@@ -29,6 +29,13 @@ const pushedButton = {
 }
 
 class App extends Component {
+  constructor (props) {
+    super(props)
+    this.state = {
+      reactionData: null
+    }
+  }
+
   componentWillMount () {
     this.setState({
       buttonStyle: buttonStyle,
@@ -164,7 +171,7 @@ class App extends Component {
   }
 
   render () {
-    //  console.log('Rendering')
+    // console.log('Rendering')
     return (
       <div className='App'>
         <EscherContainer

@@ -55,7 +55,8 @@ const disabledStyle = {
   ...buttonStyle,
   color: 'graytext',
   backgroundImage: 'linear-gradient(#D8D8D8, #D8D8D8)',
-  clear: 'both'
+  clear: 'both',
+  cursor: 'not-allowed'
 }
 const inputStyle = {
   ...buttonStyle,
@@ -81,19 +82,8 @@ function tooltipComponentFactory (getPropsFunction) {
     }
 
     transformAndSetState (escherState, escherFBAState) {
-      if (escherFBAState.lowerBound !== undefined) {
-        //
-        const lowerBoundString = parseFloat(this.state.lowerBoundString) === escherFBAState.lowerBound
-          ? this.state.lowerBoundString
-          : escherFBAState.lowerBound.toString()
-
-        //
-        const upperBoundString = parseFloat(this.state.upperBoundString) === escherFBAState.upperBound
-          ? this.state.upperBoundString
-          : escherFBAState.upperBound.toString()
-
+      if (escherState.type === 'reaction') {
         const fluxData = {}
-
         for (let i = 0, l = escherFBAState.model.reactions.length; i < l; i++) {
           if (escherFBAState.model.reactions[i].id === escherState.biggId) {
             fluxData.lowerBound = escherFBAState.model.reactions[i].lower_bound
@@ -109,18 +99,59 @@ function tooltipComponentFactory (getPropsFunction) {
           }
         }
 
-        console.log(escherState, escherFBAState)
+        const markerPosition = (fluxData.currentFlux + escherFBAState.upperRange) / (2 * (1 + escherFBAState.upperRange))
+        let textOffset = {}
+        let arrowStyle = {}
+        if (markerPosition > 0.8875 && markerPosition < 0.963) {
+          textOffset = {
+            left: -(475 * (markerPosition - 0.8875)) + '%'
+          }
+        } else if (markerPosition < 0.075 && markerPosition >= 0) {
+          textOffset = {
+            left: -(450 * (markerPosition - 0.075)) + '%'
+          }
+        } else if (markerPosition >= 0.963) {
+          textOffset = {
+            left: -45 + '%'
+          }
+        } else if (markerPosition < 0) {
+          textOffset = {
+            left: 42.5 + '%'
+          }
+        } else if (escherFBAState.reactionData === null) {
+          textOffset = {
+            visibility: 'hidden'
+          }
+          arrowStyle = {
+            visibility: 'hidden'
+          }
+        }
+
+        const lowerBoundString = parseFloat(this.state.lowerBoundString) === fluxData.lowerBound
+        ? this.state.lowerBoundString
+        : fluxData.lowerBound.toString()
+
+        //
+        const upperBoundString = parseFloat(this.state.upperBoundString) === fluxData.upperBound
+          ? this.state.upperBoundString
+          : fluxData.upperBound.toString()
+
         this.setState({
           ...escherState,
           ...escherFBAState,
           ...fluxData,
           lowerBoundString,
           upperBoundString,
+          markerLabelStyle: {...escherFBAState.markerLabelStyle, ...textOffset},
+          indicatorStyle: arrowStyle,
           knockoutButton: buttonStyle,
           resetReactionButton: buttonStyle,
           objectiveButton: buttonStyle
         })
-        console.log(fluxData, this.state)
+      } else {
+        this.setState({
+          type: escherState.type
+        })
       }
     }
 
@@ -128,7 +159,6 @@ function tooltipComponentFactory (getPropsFunction) {
       this.props.callbackManager.set('setState', escherState => {
         const escherFBAState = getPropsFunction(escherState.biggId)
         this.transformAndSetState(escherState, escherFBAState)
-        console.log(this.escherFBAState)
       })
       this.props.callbackManager.run('attachGetSize', null, this.getSize.bind(this))
     }
@@ -220,7 +250,6 @@ function tooltipComponentFactory (getPropsFunction) {
     }
 
     render () {
-      const stateData = getPropsFunction(this.state.biggId)
       // const this.state = this.state.data
       return (
         <div className='Tooltip'
@@ -301,7 +330,7 @@ function tooltipComponentFactory (getPropsFunction) {
               onMouseDown={this.mouseDown.bind(this)}
               onMouseUp={this.mouseUp.bind(this)}
               onMouseLeave={this.mouseUp.bind(this)}
-              onClick={() => stateData.resetReaction(this.state.biggId)}
+              onClick={() => this.state.resetReaction(this.state.biggId)}
               style={this.state.resetReactionButton}
             >
               Reset
@@ -312,8 +341,8 @@ function tooltipComponentFactory (getPropsFunction) {
               onMouseUp={this.mouseUp.bind(this)}
               onMouseLeave={this.mouseUp.bind(this)}
               onClick={() => this.state.setObjective(this.state.biggId)}
-              disabled={stateData.isCurrentObjective}
-              style={stateData.isCurrentObjective ? disabledStyle : this.state.objectiveButton}
+              disabled={this.state.isCurrentObjective}
+              style={this.state.isCurrentObjective ? disabledStyle : this.state.objectiveButton}
             >
               Set Objective
             </button>

@@ -24,6 +24,7 @@ class EscherContainer extends Component {
       return
     }
     // console.log('Setting reaction data')
+    this.state.builder.pass_tooltip_component_props(this.props)
     _.defer(() => {
       this.state.builder.set_reaction_data(nextProps.reactionData)
     })
@@ -66,21 +67,6 @@ class EscherContainer extends Component {
     // Get attributes from reaction
     // see story on indexing objects by bigg id
     // console.log('Running') //  Tracks getData being called
-    // this.setState({
-    //   sliderChange: f => this.props.sliderChange(f, biggId),
-    //   resetReaction: f => this.props.resetReaction(f),
-    //   setObjective: f => this.props.setObjective(f),
-    //   isAlive: this.props.reactionData !== null,
-    //   step: this.props.step,
-    //   model: this.props.model,
-    //   oldModel: this.props.oldModel,
-    //   reactionData: this.props.reactionData,
-    //   biggId,
-    //   currentObjective: this.props.currentObjective,
-    //   koMarkersSel: null,
-    //   lowerRange: this.props.lowerRange,
-    //   upperRange: this.props.upperRange
-    // })
     const tooltipProps = {
       sliderChange: f => this.props.sliderChange(f, biggId),
       resetReaction: f => this.props.resetReaction(f),
@@ -97,8 +83,6 @@ class EscherContainer extends Component {
       upperRange: this.props.upperRange,
       isCurrentObjective: false
     }
-
-    // let markerPosition = (tooltipProps.currentFlux + tooltipProps.upperRange) / (2 * (1 + tooltipProps.upperRange))
     tooltipProps.markerLabelStyle = {
       position: 'relative',
       color: 'black',
@@ -107,34 +91,6 @@ class EscherContainer extends Component {
     tooltipProps.indicatorStyle = {
       visibility: 'visible'
     }
-    // if (markerPosition > 0.8875 && markerPosition < 0.963) {
-    //   tooltipProps.markerLabelStyle = {
-    //     position: 'relative',
-    //     left: -(475 * (markerPosition - 0.8875)) + '%'
-    //   }
-    // } else if (markerPosition < 0.075 && markerPosition >= 0) {
-    //   tooltipProps.markerLabelStyle = {
-    //     position: 'relative',
-    //     left: -(450 * (markerPosition - 0.075)) + '%'
-    //   }
-    // } else if (markerPosition >= 0.963) {
-    //   tooltipProps.markerLabelStyle = {
-    //     position: 'relative',
-    //     left: -45 + '%'
-    //   }
-    // } else if (markerPosition < 0) {
-    //   tooltipProps.markerLabelStyle = {
-    //     position: 'relative',
-    //     left: 42.5 + '%'
-    //   }
-    // } else if (this.props.reactionData === null) {
-    //   tooltipProps.markerLabelStyle = {
-    //     visibility: 'hidden'
-    //   }
-    //   tooltipProps.indicatorStyle = {
-    //     visibility: 'hidden'
-    //   }
-    // }
     if (this.state.builder !== null && this.props.reactionData !== null) {
       this.state.builder.map.set_status(
         `<div>Current Objective: ${this.props.currentObjective}</div>

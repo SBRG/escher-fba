@@ -68,8 +68,8 @@ const inputStyle = {
 
 function tooltipComponentFactory (getPropsFunction) {
   return class TooltipComponent extends Component {
-    constructor () {
-      super()
+    constructor (props) {
+      super(props)
       this.state = {
         lowerBoundString: '',
         upperBoundString: '',
@@ -161,6 +161,10 @@ function tooltipComponentFactory (getPropsFunction) {
         this.transformAndSetState(escherState, escherFBAState)
       })
       this.props.callbackManager.run('attachGetSize', null, this.getSize.bind(this))
+    }
+
+    componentWillReceiveProps (nextProps) {
+      console.log(nextProps)
     }
 
     getSize () {

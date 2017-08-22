@@ -2,7 +2,7 @@
 import { h, Component } from 'preact'
 import * as escher from 'escher-vis'
 import 'escher-vis/css/dist/builder.css'
-import tooltipComponentFactory from './TooltipComponent.js'
+import TooltipComponent from './TooltipComponent.js'
 //  const d3_select = escher.libs.d3_select
 const _ = escher.libs.underscore
 const Builder = escher.Builder
@@ -24,10 +24,20 @@ class EscherContainer extends Component {
       return
     }
     // console.log('Setting reaction data')
-    this.state.builder.pass_tooltip_component_props(this.props)
+    console.log(this.props)
+    this.state.builder.pass_tooltip_component_props(nextProps)
     _.defer(() => {
       this.state.builder.set_reaction_data(nextProps.reactionData)
     })
+    if (nextProps.reactionData !== null) {
+      this.state.builder.map.set_status(
+        `<div>Current Objective: ${nextProps.currentObjective}</div>
+        <div>Flux Through Objective: ${(nextProps.reactionData[nextProps.currentObjective]).toFixed(2)}</div>`)
+    } else {
+      this.state.builder.map.set_status(
+        `<div>Current Objective: ${nextProps.currentObjective}</div>
+        <div>You killed E.coli!</div>`)
+    }
   }
 
   kosAddGroup (builder) {
@@ -59,45 +69,6 @@ class EscherContainer extends Component {
     g.append('rect')
       .style('fill', 'red')
   }
-  /**
-   * Used to remotely set the state of the tooltip component.
-   * @param {string} biggId - The BiGG ID of the reaction.
-   */
-  getProps (biggId) {
-    // Get attributes from reaction
-    // see story on indexing objects by bigg id
-    // console.log('Running') //  Tracks getData being called
-    const tooltipProps = {
-      sliderChange: f => this.props.sliderChange(f, biggId),
-      resetReaction: f => this.props.resetReaction(f),
-      setObjective: f => this.props.setObjective(f),
-      isAlive: this.props.reactionData !== null,
-      step: this.props.step,
-      model: this.props.model,
-      oldModel: this.props.oldModel,
-      reactionData: this.props.reactionData,
-      biggId,
-      currentObjective: this.props.currentObjective,
-      koMarkersSel: null,
-      lowerRange: this.props.lowerRange,
-      upperRange: this.props.upperRange,
-      isCurrentObjective: false
-    }
-    tooltipProps.markerLabelStyle = {
-      position: 'relative',
-      color: 'black',
-      visibility: 'visible'
-    }
-    tooltipProps.indicatorStyle = {
-      visibility: 'visible'
-    }
-    if (this.state.builder !== null && this.props.reactionData !== null) {
-      this.state.builder.map.set_status(
-        `<div>Current Objective: ${this.props.currentObjective}</div>
-        <div>Flux Through Objective: ${(this.props.reactionData[this.props.currentObjective]).toFixed(2)}</div>`)
-    }
-    return tooltipProps
-  }
 
   componentDidMount () {
     // need a story to fix the first_load_callback
@@ -112,7 +83,7 @@ class EscherContainer extends Component {
       //   })
       // },
       enable_keys: false,
-      tooltip_component: tooltipComponentFactory(this.getProps.bind(this))
+      tooltip_component: TooltipComponent
     })
     this.setState({ builder })
     setTimeout(() => {

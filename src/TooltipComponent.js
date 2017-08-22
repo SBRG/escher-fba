@@ -2,8 +2,6 @@
 import { h, Component } from 'preact'
 import { MultiSlider } from 'preact-range-slider'
 import 'preact-range-slider/assets/index.css'
-import * as escher from 'escher-vis'
-const _ = escher.libs.underscore
 
 const WIDTH = 500
 const HEIGHT = 185
@@ -51,6 +49,14 @@ const markerStyle = {
   color: 'black',
   width: '100%'
 }
+const markerLabelStyle = {
+  position: 'relative',
+  color: 'black',
+  visibility: 'visible'
+}
+const indicatorStyle = {
+  visibility: 'visible'
+}
 const disabledStyle = {
   ...buttonStyle,
   color: 'graytext',
@@ -66,195 +72,191 @@ const inputStyle = {
   cursor: 'text'
 }
 
-function tooltipComponentFactory (getPropsFunction) {
-  return class TooltipComponent extends Component {
-    constructor (props) {
-      super(props)
-      this.state = {
-        lowerBoundString: '',
-        upperBoundString: '',
-        markerLabelStyle: {
-          position: 'relative',
-          color: 'black',
-          visibility: 'visible'
-        }
+class TooltipComponent extends Component {
+  constructor (props) {
+    super(props)
+    this.state = {
+      lowerBoundString: '',
+      upperBoundString: '',
+      markerLabelStyle: {
+        position: 'relative',
+        color: 'black',
+        visibility: 'visible'
       }
     }
+  }
 
-    transformAndSetState (escherState, escherFBAState) {
-      if (escherState.type === 'reaction') {
-        const fluxData = {}
-        for (let i = 0, l = escherFBAState.model.reactions.length; i < l; i++) {
-          if (escherFBAState.model.reactions[i].id === escherState.biggId) {
-            fluxData.lowerBound = escherFBAState.model.reactions[i].lower_bound
-            fluxData.upperBound = escherFBAState.model.reactions[i].upper_bound
-            fluxData.name = escherFBAState.model.reactions[i].name
-            if (escherFBAState.currentObjective === escherState.biggId) {
-              fluxData.isCurrentObjective = true
-            }
-            if (escherFBAState.reactionData !== null) {
-              fluxData.currentFlux = escherFBAState.reactionData[escherState.biggId]
-            }
-            break
+  // componentDidMount () {
+  //   this.props.callbackManager.set('setState', nextProps => {
+  //     const nextProps = getPropsFunction(nextProps.biggId)
+  //     this.transformAndSetState(nextProps, nextProps)
+  //   })
+  //   this.props.callbackManager.run('attachGetSize', null, this.getSize.bind(this))
+  // }
+
+  componentWillReceiveProps (nextProps) {
+    if (nextProps.type === 'reaction') {
+      const fluxData = {}
+      for (let i = 0, l = nextProps.model.reactions.length; i < l; i++) {
+        if (nextProps.model.reactions[i].id === nextProps.biggId) {
+          fluxData.lowerBound = nextProps.model.reactions[i].lower_bound
+          fluxData.upperBound = nextProps.model.reactions[i].upper_bound
+          fluxData.name = nextProps.model.reactions[i].name
+          if (nextProps.currentObjective === nextProps.biggId) {
+            fluxData.isCurrentObjective = true
+          } else {
+            fluxData.isCurrentObjective = false
           }
+          if (nextProps.reactionData !== null) {
+            fluxData.currentFlux = nextProps.reactionData[nextProps.biggId]
+          }
+          break
         }
+      }
 
-        const markerPosition = (fluxData.currentFlux + escherFBAState.upperRange) / (2 * (1 + escherFBAState.upperRange))
-        let textOffset = {}
-        let arrowStyle = {}
-        if (markerPosition > 0.8875 && markerPosition < 0.963) {
-          textOffset = {
-            left: -(475 * (markerPosition - 0.8875)) + '%'
-          }
-        } else if (markerPosition < 0.075 && markerPosition >= 0) {
-          textOffset = {
-            left: -(450 * (markerPosition - 0.075)) + '%'
-          }
-        } else if (markerPosition >= 0.963) {
-          textOffset = {
-            left: -45 + '%'
-          }
-        } else if (markerPosition < 0) {
-          textOffset = {
-            left: 42.5 + '%'
-          }
-        } else if (escherFBAState.reactionData === null) {
-          textOffset = {
-            visibility: 'hidden'
-          }
-          arrowStyle = {
-            visibility: 'hidden'
-          }
+      const markerPosition = (fluxData.currentFlux + nextProps.upperRange) / (2 * (1 + nextProps.upperRange))
+      let textOffset = {}
+      let arrowStyle = {}
+      if (markerPosition > 0.8875 && markerPosition < 0.963) {
+        textOffset = {
+          left: -(475 * (markerPosition - 0.8875)) + '%'
         }
+      } else if (markerPosition < 0.075 && markerPosition >= 0) {
+        textOffset = {
+          left: -(450 * (markerPosition - 0.075)) + '%'
+        }
+      } else if (markerPosition >= 0.963) {
+        textOffset = {
+          left: -45 + '%'
+        }
+      } else if (markerPosition < 0) {
+        textOffset = {
+          left: 42.5 + '%'
+        }
+      } else if (nextProps.reactionData === null) {
+        textOffset = {
+          visibility: 'hidden'
+        }
+        arrowStyle = {
+          visibility: 'hidden'
+        }
+      }
 
-        const lowerBoundString = parseFloat(this.state.lowerBoundString) === fluxData.lowerBound
+      const lowerBoundString = parseFloat(this.state.lowerBoundString) === fluxData.lowerBound
         ? this.state.lowerBoundString
         : fluxData.lowerBound.toString()
 
-        //
-        const upperBoundString = parseFloat(this.state.upperBoundString) === fluxData.upperBound
-          ? this.state.upperBoundString
-          : fluxData.upperBound.toString()
+      const upperBoundString = parseFloat(this.state.upperBoundString) === fluxData.upperBound
+        ? this.state.upperBoundString
+        : fluxData.upperBound.toString()
 
-        this.setState({
-          ...escherState,
-          ...escherFBAState,
-          ...fluxData,
-          lowerBoundString,
-          upperBoundString,
-          markerLabelStyle: {...escherFBAState.markerLabelStyle, ...textOffset},
-          indicatorStyle: arrowStyle,
-          knockoutButton: buttonStyle,
-          resetReactionButton: buttonStyle,
-          objectiveButton: buttonStyle
-        })
-      } else {
-        this.setState({
-          type: escherState.type
-        })
-      }
-    }
-
-    componentDidMount () {
-      this.props.callbackManager.set('setState', escherState => {
-        const escherFBAState = getPropsFunction(escherState.biggId)
-        this.transformAndSetState(escherState, escherFBAState)
+      this.setState({
+        ...fluxData,
+        lowerBoundString,
+        upperBoundString,
+        markerLabelStyle: {...markerLabelStyle, ...textOffset},
+        indicatorStyle: {...indicatorStyle, ...arrowStyle},
+        knockoutButton: buttonStyle,
+        resetReactionButton: buttonStyle,
+        objectiveButton: buttonStyle,
+        type: nextProps.type
       })
-      this.props.callbackManager.run('attachGetSize', null, this.getSize.bind(this))
-    }
-
-    componentWillReceiveProps (nextProps) {
       console.log(nextProps)
+    } else {
+      this.setState({
+        type: nextProps.type
+      })
     }
+  }
 
-    getSize () {
-      return {width: WIDTH, height: HEIGHT}
-    }
+  getSize () {
+    return {width: WIDTH, height: HEIGHT}
+  }
 
-    /**
-     * Due to bugs inherent in the slider, all values must be converted to fall
-     * somewhere onto the positive number line in order to be displayed correctly
-     * on the slider. This function takes a given value and converts it so that it
-     * will display on the number line correctly.
-     * @param {number} value - Physiologically relevant number to be displayed on
-     * slider.
-     */
-    fluxConverter (value) {
-      return value < this.state.lowerRange // Add parenthesis for better readability
-        ? -1000
-        : value > this.state.upperRange
-        ? 1000
-        : value + this.state.upperRange + 1
-    }
-
-    /**
-     * Due to bugs inherent in the slider, all values must be converted to fall
-     * somewhere onto the positive number line in order to be displayed correctly
-     * on the slider. This function takes values from the slider and converts them
-     * back to a physiologically relevant value.
-     * @param {number} value - Slider value to be converted to physiologically
-     * relevant value.
-     */
-    tipConverter (value) {
-      let sigFig = 0
-      if (this.state.step < 1) {
-        sigFig = Math.ceil(-Math.log10(this.state.step))
-      }
-      return value === 0
+  /**
+   * Due to bugs inherent in the slider, all values must be converted to fall
+   * somewhere onto the positive number line in order to be displayed correctly
+   * on the slider. This function takes a given value and converts it so that it
+   * will display on the number line correctly.
+   * @param {number} value - Physiologically relevant number to be displayed on
+   * slider.
+   */
+  fluxConverter (value) {
+    return value < this.props.lowerRange // Add parenthesis for better readability
       ? -1000
-      : value === (2 * (this.state.upperRange + 1))
+      : value > this.props.upperRange
       ? 1000
-      : parseFloat((value - (this.state.upperRange + 1)).toFixed(sigFig))
-    }
+      : value + this.props.upperRange + 1
+  }
 
-    /**
-     * Function for applying tipConverter to arrays of numbers.
-     * @param {number[]} array - Pair of values (lower and upper bounds,
-     * respectively) to be converted from slider values to physiologically
-     * relevant values.
-     */
-    boundConverter (array) {
-      return array.map(this.tipConverter.bind(this))
+  /**
+   * Due to bugs inherent in the slider, all values must be converted to fall
+   * somewhere onto the positive number line in order to be displayed correctly
+   * on the slider. This function takes values from the slider and converts them
+   * back to a physiologically relevant value.
+   * @param {number} value - Slider value to be converted to physiologically
+   * relevant value.
+   */
+  tipConverter (value) {
+    let sigFig = 0
+    if (this.props.step < 1) {
+      sigFig = Math.ceil(-Math.log10(this.props.step))
     }
+    return value === 0
+    ? -1000
+    : value === (2 * (this.props.upperRange + 1))
+    ? 1000
+    : parseFloat((value - (this.props.upperRange + 1)).toFixed(sigFig))
+  }
 
-    mouseDown (event) {
-      this.setState({
-        [event.target.name]: pushedButton
-      })
+  /**
+   * Function for applying tipConverter to arrays of numbers.
+   * @param {number[]} array - Pair of values (lower and upper bounds,
+   * respectively) to be converted from slider values to physiologically
+   * relevant values.
+   */
+  boundConverter (array) {
+    return array.map(this.tipConverter.bind(this))
+  }
+
+  mouseDown (event) {
+    this.setState({
+      [event.target.name]: pushedButton
+    })
+  }
+
+  mouseUp (event) {
+    this.setState({
+      [event.target.name]: buttonStyle
+    })
+  }
+
+  handleMarkerPosition (currentFlux) {
+    if (this.props.reactionData !== null) {
+      return currentFlux < this.props.lowerRange // Add parenthesis for better readability
+        ? 0
+        : currentFlux > this.props.upperRange
+        ? 2 * (this.props.upperRange + 1)
+        : currentFlux + this.props.upperRange + 1
+    } else {
+      return this.props.upperRange + 1
     }
+  }
 
-    mouseUp (event) {
-      this.setState({
-        [event.target.name]: buttonStyle
-      })
+  handleKeyUp (event, bounds) {
+    this.setState({
+      lowerBoundString: bounds[0],
+      upperBoundString: bounds[1]
+    })
+    if (isNaN(parseFloat(event.target.value))) {
+      console.log('Invalid Bounds')
+    } else {
+      this.props.sliderChange([parseFloat(this.state.lowerBoundString), parseFloat(this.state.upperBoundString)], this.props.biggId)
     }
+  }
 
-    handleMarkerPosition (currentFlux) {
-      if (this.state.isAlive) {
-        return currentFlux < this.state.lowerRange // Add parenthesis for better readability
-          ? 0
-          : currentFlux > this.state.upperRange
-          ? 2 * (this.state.upperRange + 1)
-          : currentFlux + this.state.upperRange + 1
-      } else {
-        return this.state.upperRange + 1
-      }
-    }
-
-    handleKeyUp (event, bounds) {
-      this.setState({
-        lowerBoundString: bounds[0],
-        upperBoundString: bounds[1]
-      })
-      if (isNaN(parseFloat(event.target.value))) {
-        console.log('Invalid Bounds')
-      } else {
-        this.state.sliderChange([parseFloat(this.state.lowerBoundString), parseFloat(this.state.upperBoundString)])
-      }
-    }
-
-    render () {
-      // const this.state = this.state.data
+  render () {
+    if (this.state.type === 'reaction') {
       return (
         <div className='Tooltip'
           style={{
@@ -262,28 +264,28 @@ function tooltipComponentFactory (getPropsFunction) {
           }}
           >
           <div style={{fontSize: '20px', fontWeight: 'bold'}}>
-            {this.state.biggId}
+            {this.props.biggId}
           </div>
           <div style={{fontSize: '15px', marginBottom: '6px'}}>
-            {this.state.name}
+            {this.props.name}
           </div>
           <MultiSlider
             min={0}
-            max={2 * (this.state.upperRange + 1)}
-            step={this.state.step}
+            max={2 * (this.props.upperRange + 1)}
+            step={this.props.step}
             value={[
-              this.state.lowerBound + 26,
-              this.state.upperBound + 26
+              this.fluxConverter(this.state.lowerBound),
+              this.fluxConverter(this.state.upperBound)
             ]}
             tipFormatter={f => this.tipConverter(f)}
             allowCross={false}
             pushable={0}
-            onChange={_.throttle(f => this.state.sliderChange(this.boundConverter(f)))}
-            onAfterChange={f => this.state.sliderChange(this.boundConverter(f))}
+            onChange={f => this.props.sliderChange(this.boundConverter(f), this.props.biggId)}
+            onAfterChange={f => this.props.sliderChange(this.boundConverter(f), this.props.biggId)}
             marks={{ [this.handleMarkerPosition(this.state.currentFlux)]: <div style={markerStyle}>
               <div style={{...this.state.indicatorStyle, fontSize: '20px'}}>&#11014;</div>
               <div style={this.state.markerLabelStyle}>
-                Current Flux: {this.state.data}
+                Current Flux: {this.props.data}
               </div>
             </div> } //  Define outside of return function
             }
@@ -323,7 +325,7 @@ function tooltipComponentFactory (getPropsFunction) {
               onMouseUp={this.mouseUp.bind(this)}
               onMouseLeave={this.mouseUp.bind(this)}
               onClick={
-                () => this.state.sliderChange([0, 0])
+                () => this.props.sliderChange([0, 0], this.props.biggId)
               }
               style={this.state.knockoutButton}
             >
@@ -334,7 +336,7 @@ function tooltipComponentFactory (getPropsFunction) {
               onMouseDown={this.mouseDown.bind(this)}
               onMouseUp={this.mouseUp.bind(this)}
               onMouseLeave={this.mouseUp.bind(this)}
-              onClick={() => this.state.resetReaction(this.state.biggId)}
+              onClick={() => this.props.resetReaction(this.props.biggId)}
               style={this.state.resetReactionButton}
             >
               Reset
@@ -344,7 +346,7 @@ function tooltipComponentFactory (getPropsFunction) {
               onMouseDown={this.mouseDown.bind(this)}
               onMouseUp={this.mouseUp.bind(this)}
               onMouseLeave={this.mouseUp.bind(this)}
-              onClick={() => this.state.setObjective(this.state.biggId)}
+              onClick={() => this.props.setObjective(this.props.biggId)}
               disabled={this.state.isCurrentObjective}
               style={this.state.isCurrentObjective ? disabledStyle : this.state.objectiveButton}
             >
@@ -363,8 +365,10 @@ function tooltipComponentFactory (getPropsFunction) {
           </div>
         </div>
       )
+    } else {
+      return null
     }
   }
 }
 
-export default tooltipComponentFactory
+export default TooltipComponent

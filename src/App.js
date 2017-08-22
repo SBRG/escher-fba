@@ -46,6 +46,8 @@ class App extends Component {
   }
 
   componentDidMount () {
+    // const tooltipSize = this.tooltipRef.getSize()
+    // console.log(tooltipSize)
     let solution = this.state.model.optimize()
     if (solution.objectiveValue < 1e-3) {
       this.setState({ reactionData: null })
@@ -147,7 +149,10 @@ class App extends Component {
     }
     const solution = this.state.model.optimize()
     if (solution.objectiveValue < 1e-3) {
-      this.setState({ reactionData: null })
+      this.setState({
+        reactionData: null,
+        currentObjective: biggId
+      })
       console.log('You killed E.coli!')
     } else {
       this.setState({
@@ -186,6 +191,7 @@ class App extends Component {
           lowerRange={-25}
           upperRange={25}
           step={0.1}
+          ref={instance => { this.tooltipRef = instance }}
         />
         <button
           className='resetMapButton'

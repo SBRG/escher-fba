@@ -13,6 +13,7 @@ class EscherContainer extends Component {
     this.state = {
       builder: null
     }
+    console.log(props)
   }
 
   //  Enables Escher handling DOM

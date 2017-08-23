@@ -161,7 +161,6 @@ class TooltipComponent extends Component {
         objectiveButton: buttonStyle,
         type: nextProps.type
       })
-      console.log(nextProps)
     } else {
       this.setState({
         type: nextProps.type

@@ -86,16 +86,8 @@ class TooltipComponent extends Component {
     }
   }
 
-  // componentDidMount () {
-  //   this.props.callbackManager.set('setState', nextProps => {
-  //     const nextProps = getPropsFunction(nextProps.biggId)
-  //     this.transformAndSetState(nextProps, nextProps)
-  //   })
-  //   this.props.callbackManager.run('attachGetSize', null, this.getSize.bind(this))
-  // }
-
   componentWillReceiveProps (nextProps) {
-    if (nextProps.type === 'reaction') {
+    if (nextProps.type === 'reaction' && nextProps.model !== null) {
       const fluxData = {}
       for (let i = 0, l = nextProps.model.reactions.length; i < l; i++) {
         if (nextProps.model.reactions[i].id === nextProps.biggId) {
@@ -201,9 +193,9 @@ class TooltipComponent extends Component {
     if (this.props.step < 1) {
       sigFig = Math.ceil(-Math.log10(this.props.step))
     }
-    return value === 0
+    return value < 1
     ? -1000
-    : value === (2 * (this.props.upperRange + 1))
+    : value > (2 * this.props.upperRange + 1)
     ? 1000
     : parseFloat((value - (this.props.upperRange + 1)).toFixed(sigFig))
   }

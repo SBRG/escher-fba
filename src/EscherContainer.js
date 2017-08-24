@@ -13,7 +13,6 @@ class EscherContainer extends Component {
     this.state = {
       builder: null
     }
-    console.log(props)
   }
 
   //  Enables Escher handling DOM
@@ -25,20 +24,10 @@ class EscherContainer extends Component {
       return
     }
     // console.log('Setting reaction data')
-    console.log(this.props)
     this.state.builder.pass_tooltip_component_props(nextProps)
     _.defer(() => {
       this.state.builder.set_reaction_data(nextProps.reactionData)
     })
-    if (nextProps.reactionData !== null) {
-      this.state.builder.map.set_status(
-        `<div>Current Objective: ${nextProps.currentObjective}</div>
-        <div>Flux Through Objective: ${(nextProps.reactionData[nextProps.currentObjective]).toFixed(2)}</div>`)
-    } else {
-      this.state.builder.map.set_status(
-        `<div>Current Objective: ${nextProps.currentObjective}</div>
-        <div>You killed E.coli!</div>`)
-    }
   }
 
   kosAddGroup (builder) {
@@ -72,7 +61,6 @@ class EscherContainer extends Component {
   }
 
   componentDidMount () {
-    // need a story to fix the first_load_callback
     const builder = new Builder(this.props.map, this.props.model, null, this.base, {
       fill_screen: true,
       // first_load_callback: builder => {
@@ -87,11 +75,7 @@ class EscherContainer extends Component {
       tooltip_component: TooltipComponent
     })
     this.setState({ builder })
-    setTimeout(() => {
-      this.state.builder.map.set_status(
-      `<div>Current Objective: ${this.props.currentObjective}</div>
-      <div>Flux Through Objective: ${(this.props.reactionData[this.props.currentObjective]).toFixed(2)}</div>`)
-    }, 500)
+    this.state.builder.callback_manager.set('load_model', this.props.loadModel.bind(this))
   }
 
   render () {

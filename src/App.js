@@ -32,31 +32,79 @@ class App extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      reactionData: null
+      modelData,
+      reactionData: null,
+      objectiveFlux: 0
     }
   }
 
   componentWillMount () {
     this.setState({
       buttonStyle: buttonStyle,
-      model: new Model(modelData),
-      oldModel: new Model(modelData),
-      currentObjective: 'Biomass_Ecoli_core_w_GAM'
+      model: new Model(this.state.modelData),
+      oldModel: new Model(this.state.modelData)
     })
   }
 
   componentDidMount () {
+    const reactions = this.state.model.reactions
+    let currentObjective = null
+    let reactionData = null
+    let objectiveFlux = null
+    for (let i = 0, l = reactions.length; i < l; i++) {
+      if (reactions[i].objective_coefficient === 1) {
+        currentObjective = reactions[i].id
+      }
+    }
     let solution = this.state.model.optimize()
     if (solution.objectiveValue < 1e-3) {
-      this.setState({ reactionData: null })
+      reactionData = null
+      objectiveFlux = 'Infeasible solution/Dead cell'
       console.log('You killed E.coli!')
     } else {
-      this.setState({ reactionData: solution.fluxes })
+      reactionData = solution.fluxes
+      objectiveFlux = solution.objectiveValue.toFixed(3)
     }
+    this.setState({
+      currentObjective,
+      reactionData,
+      objectiveFlux
+    })
   }
 
   modelOptimize () {
     //  TODO
+  }
+
+  loadModel (newModel) {
+    const model = new Model(newModel)
+    const oldModel = new Model(newModel)
+    const reactions = model.reactions
+    let currentObjective = null
+    let reactionData = null
+    let objectiveFlux = null
+    for (let i = 0, l = reactions.length; i < l; i++) {
+      if (reactions[i].objective_coefficient === 1) {
+        currentObjective = reactions[i].id
+      }
+    }
+    let solution = model.optimize()
+    if (solution.objectiveValue < 1e-3) {
+      reactionData = null
+      objectiveFlux = 'Infeasible solution/Dead cell'
+      console.log('You killed E.coli!')
+    } else {
+      reactionData = solution.fluxes
+      objectiveFlux = solution.objectiveValue.toFixed(3)
+    }
+    this.setState({
+      modelData: newModel,
+      model,
+      oldModel,
+      currentObjective,
+      reactionData,
+      objectiveFlux
+    })
   }
 
   /**
@@ -70,6 +118,8 @@ class App extends Component {
    */
   sliderChange (bounds, biggId) {
     const reactions = this.state.model.reactions
+    let reactionData = null
+    let objectiveFlux = null
     for (let i = 0, l = reactions.length; i < l; i++) {
       if (reactions[i].id === biggId) {
         reactions[i].lower_bound = bounds[0]
@@ -78,11 +128,17 @@ class App extends Component {
     }
     const solution = this.state.model.optimize()
     if (solution.objectiveValue < 1e-3) {
-      this.setState({ reactionData: null })
+      reactionData = null
+      objectiveFlux = 'Infeasible solution/Dead cell'
       console.log('You killed E.coli!')
     } else {
-      this.setState({ reactionData: solution.fluxes })
+      reactionData = solution.fluxes
+      objectiveFlux = solution.objectiveValue.toFixed(3)
     }
+    this.setState({
+      reactionData,
+      objectiveFlux
+    })
   }
 
   /**
@@ -90,17 +146,31 @@ class App extends Component {
    * the original model and finds the set of fluxes.
    */
   resetMap () {
-    this.setState({
-      model: new Model(modelData),
-      currentObjective: 'Biomass_Ecoli_core_w_GAM'
-    })
-    const solution = this.state.model.optimize()
+    const model = new Model(this.state.modelData)
+    const reactions = model.reactions
+    let currentObjective = null
+    let objectiveFlux = null
+    let reactionData = null
+    for (let i = 0, l = reactions.length; i < l; i++) {
+      if (reactions[i].objective_coefficient === 1) {
+        currentObjective = reactions[i].id
+      }
+    }
+    const solution = model.optimize()
     if (solution.objectiveValue < 1e-3) {
-      this.setState({ reactionData: null })
+      reactionData = null
+      objectiveFlux = 'Infeasible solution/Dead cell'
       console.log('You killed E.coli!')
     } else {
-      this.setState({ reactionData: solution.fluxes })
+      reactionData = solution.fluxes
+      objectiveFlux = solution.objectiveValue.toFixed(3)
     }
+    this.setState({
+      model,
+      currentObjective,
+      reactionData,
+      objectiveFlux
+    })
   }
 
   /**
@@ -113,6 +183,9 @@ class App extends Component {
   resetReaction (biggId) {
     const reactions = this.state.model.reactions
     const oldReactions = this.state.oldModel.reactions
+    let objectiveFlux = null
+    let reactionData = null
+    let model = null
     for (let i = 0, l = reactions.length; i < l; i++) {
       if (reactions[i].id === biggId) {
         reactions[i].lower_bound = oldReactions[i].lower_bound
@@ -121,11 +194,19 @@ class App extends Component {
     }
     const solution = this.state.model.optimize()
     if (solution.objectiveValue < 1e-3) {
-      this.setState({ reactionData: null })
+      reactionData = null
+      objectiveFlux = 'Infeasible solution/Dead cell'
       console.log('You killed E.coli!')
     } else {
-      this.setState({ reactionData: solution.fluxes, model: this.state.model })
+      reactionData = solution.fluxes
+      objectiveFlux = solution.objectiveValue.toFixed(3)
+      model = this.state.model
     }
+    this.setState({
+      reactionData,
+      model,
+      objectiveFlux
+    })
   }
 
   /**
@@ -138,6 +219,9 @@ class App extends Component {
    */
   setObjective (biggId) {
     const reactions = this.state.model.reactions
+    let objectiveFlux = null
+    let reactionData = null
+    let model = null
     for (let i = 0, l = reactions.length; i < l; i++) {
       if (reactions[i].id === biggId) {
         reactions[i].objective_coefficient = 1
@@ -147,18 +231,21 @@ class App extends Component {
     }
     const solution = this.state.model.optimize()
     if (solution.objectiveValue < 1e-3) {
-      this.setState({
-        reactionData: null,
-        currentObjective: biggId
-      })
+      reactionData = null
+      model = this.state.model
+      objectiveFlux = 'Infeasible solution/Dead cell'
       console.log('You killed E.coli!')
     } else {
-      this.setState({
-        reactionData: solution.fluxes,
-        model: this.state.model,
-        currentObjective: biggId
-      })
+      reactionData = solution.fluxes
+      model = this.state.model
+      objectiveFlux = solution.objectiveValue.toFixed(3)
     }
+    this.setState({
+      reactionData,
+      model,
+      currentObjective: biggId,
+      objectiveFlux
+    })
   }
 
   mouseDown (event) {
@@ -186,10 +273,26 @@ class App extends Component {
           sliderChange={(bounds, biggId) => this.sliderChange(bounds, biggId)}
           resetReaction={(biggId) => this.resetReaction(biggId)}
           setObjective={(biggId) => this.setObjective(biggId)}
+          loadModel={(newModel) => this.loadModel(newModel)}
           lowerRange={-25}
           upperRange={25}
           step={0.1}
         />
+        <div
+          className='statusBar'
+          style={{
+            position: 'absolute',
+            bottom: '10px',
+            left: '20px',
+            color: 'red',
+            backgroundColor: 'white',
+            fontSize: '16px'
+          }}
+          >
+          Current Flux: {this.state.currentObjective}
+          <br />
+          Flux Through Objective: {this.state.objectiveFlux}
+        </div>
         <button
           className='resetMapButton'
           style={this.state.buttonStyle}

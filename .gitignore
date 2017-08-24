@@ -11,3 +11,5 @@ build
 npm-debug.log
 package-lock.json
 yarn.lock
+maps/iJO1366.Central metabolism.json
+models/iJO1366.json

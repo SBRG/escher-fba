@@ -55,7 +55,11 @@ export class Model {
       } else {
         glp_set_col_bnds(lp, colInd, GLP_DB, reaction.lower_bound, reaction.upper_bound)
       }
-      glp_set_obj_coef(lp, colInd, reaction.objective_coefficient)
+
+      // object_coefficient is optional for reaction in COBRA JSON
+      if ('objective_coefficient' in reaction) {
+        glp_set_obj_coef(lp, colInd, reaction.objective_coefficient)
+      }
 
       // S matrix values
       for (var met_id in reaction.metabolites) {
@@ -74,7 +78,10 @@ export class Model {
   optimize () {
     const problem = this.buildGlpkProblem()
     var smcp = new SMCP({ presolve: GLP_ON })
-    glp_simplex(problem, smcp)
+    const returnCode = glp_simplex(problem, smcp)
+    if (returnCode !== 0) {
+      console.log('do something')
+    }
     // get the objective
     var f = glp_get_obj_val(problem)
     // get the primal

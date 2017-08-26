@@ -1,7 +1,7 @@
 /** @jsx h */
 import { h, Component } from 'preact'
-import { MultiSlider } from 'preact-range-slider'
-import 'preact-range-slider/assets/index.css'
+import { Range } from 'rc-slider-preact'
+import 'rc-slider-preact/lib/index.css'
 
 const WIDTH = 500
 const HEIGHT = 185
@@ -12,7 +12,7 @@ const tooltipStyle = {
   height: HEIGHT + 'px',
   borderRadius: '2px',
   border: '1px solid #b58787',
-  padding: '7px',
+  padding: '1.5%',
   backgroundColor: '#fff',
   textAlign: 'left',
   fontSize: '16px',
@@ -22,14 +22,15 @@ const tooltipStyle = {
   position: 'relative'
 }
 const interfacePanelStyle = {
-  marginTop: '55px',
-  marginLeft: '0%'
+  //  boxSizing: 'border-box',
+  position: 'absolute',
+  bottom: '4%',
+  width: '100%'
 }
 const buttonStyle = {
-  marginLeft: '2.625%',
-  marginTop: '-10px',
-  color: 'white',
   clear: 'both',
+  margin: '0% 1.5%',
+  color: 'white',
   border: '1px solid #2E2F2F',
   backgroundImage: 'linear-gradient(#4F5151, #474949 6%, #3F4141)',
   backgroundColor: '#474949',
@@ -44,6 +45,11 @@ const pushedButton = {
   ...buttonStyle,
   backgroundImage: 'linear-gradient(#3F4141, #474949 6%, #4F5151)'
 }
+const sliderStyle = {
+  width: '97.575534823%',
+  display: 'block',
+  margin: 'auto'
+}
 const markerStyle = {
   marginLeft: '-50%',
   color: 'black',
@@ -55,6 +61,8 @@ const markerLabelStyle = {
   visibility: 'visible'
 }
 const indicatorStyle = {
+  height: '10%',
+  left: '0%',
   visibility: 'visible'
 }
 const disabledStyle = {
@@ -66,9 +74,9 @@ const disabledStyle = {
 }
 const inputStyle = {
   ...buttonStyle,
+  position: 'relative',
   maxWidth: '47px',
   textAlign: 'center',
-  clear: 'both',
   cursor: 'text'
 }
 
@@ -87,22 +95,37 @@ class TooltipComponent extends Component {
   }
 
   componentWillReceiveProps (nextProps) {
-    if (nextProps.type === 'reaction' && nextProps.model !== null) {
+    if (nextProps.type === 'reaction' && nextProps.model !== undefined) {
       const fluxData = {}
-      for (let i = 0, l = nextProps.model.reactions.length; i < l; i++) {
-        if (nextProps.model.reactions[i].id === nextProps.biggId) {
-          fluxData.lowerBound = nextProps.model.reactions[i].lower_bound
-          fluxData.upperBound = nextProps.model.reactions[i].upper_bound
-          fluxData.name = nextProps.model.reactions[i].name
-          if (nextProps.currentObjective === nextProps.biggId) {
-            fluxData.isCurrentObjective = true
-          } else {
-            fluxData.isCurrentObjective = false
+      if (nextProps.biggId !== this.props.biggId || nextProps.model !== this.props.model) {
+        for (let i = 0, l = nextProps.model.reactions.length; i < l; i++) {
+          if (nextProps.model.reactions[i].id === nextProps.biggId) {
+            fluxData.lowerBound = nextProps.model.reactions[i].lower_bound
+            fluxData.upperBound = nextProps.model.reactions[i].upper_bound
+            fluxData.lowerBoundString = nextProps.model.reactions[i].lower_bound.toString()
+            fluxData.upperBoundString = nextProps.model.reactions[i].upper_bound.toString()
+            fluxData.lowerBoundOld = nextProps.oldModel.reactions[i].lower_bound
+            fluxData.upperBoundOld = nextProps.oldModel.reactions[i].upper_bound
+            fluxData.name = nextProps.model.reactions[i].name
+            if (nextProps.currentObjective === nextProps.biggId) {
+              fluxData.isCurrentObjective = true
+            } else {
+              fluxData.isCurrentObjective = false
+            }
+            if (nextProps.reactionData !== null) {
+              fluxData.currentFlux = nextProps.reactionData[nextProps.biggId]
+            }
+            break
           }
-          if (nextProps.reactionData !== null) {
-            fluxData.currentFlux = nextProps.reactionData[nextProps.biggId]
+        }
+      } else {
+        for (let i = 0, l = nextProps.model.reactions.length; i < l; i++) {
+          if (nextProps.model.reactions[i].id === nextProps.biggId) {
+            if (nextProps.reactionData !== null) {
+              fluxData.currentFlux = nextProps.reactionData[nextProps.biggId]
+            }
+            break
           }
-          break
         }
       }
 
@@ -134,18 +157,10 @@ class TooltipComponent extends Component {
         }
       }
 
-      const lowerBoundString = parseFloat(this.state.lowerBoundString) === fluxData.lowerBound
-        ? this.state.lowerBoundString
-        : fluxData.lowerBound.toString()
-
-      const upperBoundString = parseFloat(this.state.upperBoundString) === fluxData.upperBound
-        ? this.state.upperBoundString
-        : fluxData.upperBound.toString()
-
       this.setState({
         ...fluxData,
-        lowerBoundString,
-        upperBoundString,
+        // lowerBoundString,
+        // upperBoundString,
         markerLabelStyle: {...markerLabelStyle, ...textOffset},
         indicatorStyle: {...indicatorStyle, ...arrowStyle},
         knockoutButton: buttonStyle,
@@ -239,15 +254,38 @@ class TooltipComponent extends Component {
       lowerBoundString: bounds[0],
       upperBoundString: bounds[1]
     })
-    if (isNaN(parseFloat(event.target.value))) {
-      console.log('Invalid Bounds')
-    } else {
-      this.props.sliderChange([parseFloat(this.state.lowerBoundString), parseFloat(this.state.upperBoundString)], this.props.biggId)
+    if (parseFloat(bounds[0]) !== this.state.lowerBound || parseFloat(bounds[1]) !== this.state.upperBound) {
+      if (isNaN(parseFloat(event.target.value))) {
+        console.log('Invalid Bounds')
+      } else {
+        this.sliderChange([parseFloat(this.state.lowerBoundString), parseFloat(this.state.upperBoundString)])
+      }
     }
   }
 
+  sliderChange (bounds) {
+    if (bounds[0] !== parseFloat(this.state.lowerBoundString) || bounds[1] !== parseFloat(this.state.upperBoundString)) {
+      this.setState({
+        lowerBound: bounds[0],
+        upperBound: bounds[1],
+        lowerBoundString: bounds[0].toString(),
+        upperBoundString: bounds[1].toString()
+      })
+    } else {
+      this.setState({
+        lowerBound: bounds[0],
+        upperBound: bounds[1]
+      })
+    }
+    this.props.sliderChange(bounds, this.props.biggId)
+  }
+
+  resetReaction () {
+    this.sliderChange([this.state.lowerBoundOld, this.state.upperBoundOld], this.props.biggId)
+  }
+
   render () {
-    if (this.state.type === 'reaction') {
+    if (this.state.type === 'reaction' && this.props.model !== undefined) {
       return (
         <div className='Tooltip'
           style={{
@@ -260,7 +298,8 @@ class TooltipComponent extends Component {
           <div style={{fontSize: '15px', marginBottom: '6px'}}>
             {this.props.name}
           </div>
-          <MultiSlider
+          <Range
+            style={sliderStyle}
             min={0}
             max={2 * (this.props.upperRange + 1)}
             step={this.props.step}
@@ -268,91 +307,119 @@ class TooltipComponent extends Component {
               this.fluxConverter(this.state.lowerBound),
               this.fluxConverter(this.state.upperBound)
             ]}
-            tipFormatter={f => this.tipConverter(f)}
+            tipFormatter={() => null}
             allowCross={false}
             pushable={0}
-            onChange={f => this.props.sliderChange(this.boundConverter(f), this.props.biggId)}
-            onAfterChange={f => this.props.sliderChange(this.boundConverter(f), this.props.biggId)}
-            marks={{ [this.handleMarkerPosition(this.state.currentFlux)]: <div style={markerStyle}>
-              <div style={{...this.state.indicatorStyle, fontSize: '20px'}}>&#11014;</div>
-              <div style={this.state.markerLabelStyle}>
-                Current Flux: {this.props.data}
-              </div>
-            </div> } //  Define outside of return function
-            }
+            onChange={f => this.sliderChange(this.boundConverter(f))}
+            onAfterChange={f => this.sliderChange(this.boundConverter(f))}
+              //  this.handleMarkerPosition(this.state.currentFlux): {{...this.state.indicatorStyle, fontSize: '20px'}, '&#11014;'}}
+              /* <div style={markerStyle}>
+                <div style={{...this.state.indicatorStyle, fontSize: '20px'}}>&#11014;</div>
+                <div style={this.state.markerLabelStyle}>
+                  Current Flux: {this.props.data}
+                </div>
+              </div>  */
+            // } //  Define outside of return function */}
           />
+          <div name='indicator' style={indicatorStyle}>
+            <svg viewBox='0 0 100 100' height='100%' width='100%'>
+              <defs>
+                <marker id='markerArrow1' viewBox='0 0 6 6' refX='4' refY='3' orient='auto'>
+                  <path d='M5,3 L3,5 L3,1 Z' fill='black' stroke='black' />
+                </marker>
+              </defs>
+              <line x1='5' y1='3' x2='5' y2='1' stroke-width='0.5' stroke='black' marker-end={'url(#markerArrow1)'} />
+            </svg>
+          </div>
           {/* Kebab case for class names?  */}
           <div className='interfacePanel' style={interfacePanelStyle}>
-            <div
-              style={{
-                fontSize: '12px',
-                float: 'left'
-              }}
-            >
-            Lower bound
+            <div className='labels'>
+              <div
+                style={{
+                  float: 'left',
+                  fontSize: '12px'
+                }}
+              >
+              Lower bound
+              </div>
+              <div
+                style={{
+                  float: 'right',
+                  fontSize: '12px'
+                }}
+              >
+              Upper bound
+              </div>
             </div>
-            <div
-              style={{
-                fontSize: '12px',
-                float: 'right'
-              }}
-            >
-            Upper bound
+            <div className='buttons' style={{clear: 'both'}}>
+              <input
+                type='text'
+                name='lowerBound'
+                value={this.state.lowerBoundString}
+                style={inputStyle}
+                onFocus={(event) => event.target.select()}
+                onKeyUp={
+                  event => this.handleKeyUp(event, [event.target.value, this.state.upperBoundString])
+                }
+              />
+              <button
+                name='knockoutButton'
+                onMouseDown={this.mouseDown.bind(this)}
+                onMouseUp={this.mouseUp.bind(this)}
+                onMouseLeave={this.mouseUp.bind(this)}
+                onClick={
+                  () => this.sliderChange([0, 0])
+                }
+                style={this.state.knockoutButton}
+              >
+                Knockout Reaction
+              </button>
+              <button
+                name='resetReactionButton'
+                onMouseDown={this.mouseDown.bind(this)}
+                onMouseUp={this.mouseUp.bind(this)}
+                onMouseLeave={this.mouseUp.bind(this)}
+                onClick={() => this.resetReaction()}
+                style={this.state.resetReactionButton}
+              >
+                Reset
+              </button>
+              <button
+                name='objectiveButton'
+                onMouseDown={this.mouseDown.bind(this)}
+                onMouseUp={this.mouseUp.bind(this)}
+                onMouseLeave={this.mouseUp.bind(this)}
+                onClick={() => this.props.setObjective(this.props.biggId)}
+                disabled={this.state.isCurrentObjective}
+                style={this.state.isCurrentObjective ? disabledStyle : this.state.objectiveButton}
+              >
+                Set Objective
+              </button>
+              <input
+                type='text'
+                name='upperBound'
+                value={this.state.upperBoundString}
+                style={inputStyle}
+                onFocus={(event) => event.target.select()}
+                onKeyUp={
+                  event => this.handleKeyUp(event, [this.state.lowerBound, event.target.value])
+                }
+              />
             </div>
-            <br />
-            <input
-              type='text'
-              name='lowerBound'
-              value={this.state.lowerBoundString}
-              style={inputStyle}
-              onFocus={(event) => event.target.select()}
-              onKeyUp={
-                event => this.handleKeyUp(event, [event.target.value, this.state.upperBound])
-              }
-            />
-            <button
-              name='knockoutButton'
-              onMouseDown={this.mouseDown.bind(this)}
-              onMouseUp={this.mouseUp.bind(this)}
-              onMouseLeave={this.mouseUp.bind(this)}
-              onClick={
-                () => this.props.sliderChange([0, 0], this.props.biggId)
-              }
-              style={this.state.knockoutButton}
-            >
-              Knockout Reaction
-            </button>
-            <button
-              name='resetReactionButton'
-              onMouseDown={this.mouseDown.bind(this)}
-              onMouseUp={this.mouseUp.bind(this)}
-              onMouseLeave={this.mouseUp.bind(this)}
-              onClick={() => this.props.resetReaction(this.props.biggId)}
-              style={this.state.resetReactionButton}
-            >
-              Reset
-            </button>
-            <button
-              name='objectiveButton'
-              onMouseDown={this.mouseDown.bind(this)}
-              onMouseUp={this.mouseUp.bind(this)}
-              onMouseLeave={this.mouseUp.bind(this)}
-              onClick={() => this.props.setObjective(this.props.biggId)}
-              disabled={this.state.isCurrentObjective}
-              style={this.state.isCurrentObjective ? disabledStyle : this.state.objectiveButton}
-            >
-              Set Objective
-            </button>
-            <input
-              type='text'
-              name='upperBound'
-              value={this.state.upperBoundString}
-              style={inputStyle}
-              onFocus={(event) => event.target.select()}
-              onKeyUp={
-                event => this.handleKeyUp(event, [this.state.lowerBound, event.target.value])
-              }
-            />
+          </div>
+        </div>
+      )
+    } else if (this.state.type === 'reaction' && this.props.model === undefined) {
+      return (
+        <div className='Tooltip'
+          style={{
+            ...tooltipStyle,
+            height: '50px',
+            width: '400px'
+          }}
+          >
+          <div style={{fontSize: '20px', fontWeight: 'bold'}}>
+            {this.props.biggId} is not in the model
           </div>
         </div>
       )

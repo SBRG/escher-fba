@@ -4,8 +4,11 @@ import './App.css'
 import 'preact-range-slider/assets/index.css'
 import EscherContainer from './EscherContainer.js'
 import { Model } from './COBRA.js'
+import * as escher from 'escher-vis'
 import modelData from './E coli core.json'
 import map from './E coli core.Core metabolism.json'
+
+const _ = escher.libs.underscore
 
 const buttonStyle = {
   position: 'absolute',
@@ -36,6 +39,7 @@ class App extends Component {
       reactionData: null,
       objectiveFlux: 0
     }
+    this.runThrottledOptimization = _.throttle(this.runOptimization, 1000)
   }
 
   componentWillMount () {
@@ -72,10 +76,6 @@ class App extends Component {
     })
   }
 
-  modelOptimize () {
-    //  TODO
-  }
-
   loadModel (newModel) {
     const model = new Model(newModel)
     const oldModel = new Model(newModel)
@@ -107,6 +107,22 @@ class App extends Component {
     })
   }
 
+  runOptimization (reactionData, objectiveFlux) {
+    const solution = this.state.model.optimize()
+    if (solution.objectiveValue < 1e-3) {
+      reactionData = null
+      objectiveFlux = 'Infeasible solution/Dead cell'
+      console.log('You killed E.coli!')
+    } else {
+      reactionData = solution.fluxes
+      objectiveFlux = solution.objectiveValue.toFixed(3)
+    }
+    this.setState({
+      reactionData,
+      objectiveFlux
+    })
+  }
+
   /**
    * Loops through the model's list of reactions until it finds the one that
    * matches the BiGG ID parameter then sets the lower and upper bounds of that
@@ -126,19 +142,7 @@ class App extends Component {
         reactions[i].upper_bound = bounds[1]
       }
     }
-    const solution = this.state.model.optimize()
-    if (solution.objectiveValue < 1e-3) {
-      reactionData = null
-      objectiveFlux = 'Infeasible solution/Dead cell'
-      console.log('You killed E.coli!')
-    } else {
-      reactionData = solution.fluxes
-      objectiveFlux = solution.objectiveValue.toFixed(3)
-    }
-    this.setState({
-      reactionData,
-      objectiveFlux
-    })
+    this.runThrottledOptimization(reactionData, objectiveFlux)
   }
 
   /**
@@ -156,6 +160,7 @@ class App extends Component {
         currentObjective = reactions[i].id
       }
     }
+    // instead call runOptimization
     const solution = model.optimize()
     if (solution.objectiveValue < 1e-3) {
       reactionData = null
@@ -169,42 +174,6 @@ class App extends Component {
       model,
       currentObjective,
       reactionData,
-      objectiveFlux
-    })
-  }
-
-  /**
-   * Loops through the list of reactions until the reaction matching the BiGG ID
-   * is found then sets the lower and upper bounds of that reaction to whatever
-   * they were originally before finding the new set of fluxes and setting the
-   * state of reactionData.
-   * @param {string} biggId - BiGG ID of the reaction.
-   */
-  resetReaction (biggId) {
-    const reactions = this.state.model.reactions
-    const oldReactions = this.state.oldModel.reactions
-    let objectiveFlux = null
-    let reactionData = null
-    let model = null
-    for (let i = 0, l = reactions.length; i < l; i++) {
-      if (reactions[i].id === biggId) {
-        reactions[i].lower_bound = oldReactions[i].lower_bound
-        reactions[i].upper_bound = oldReactions[i].upper_bound
-      }
-    }
-    const solution = this.state.model.optimize()
-    if (solution.objectiveValue < 1e-3) {
-      reactionData = null
-      objectiveFlux = 'Infeasible solution/Dead cell'
-      console.log('You killed E.coli!')
-    } else {
-      reactionData = solution.fluxes
-      objectiveFlux = solution.objectiveValue.toFixed(3)
-      model = this.state.model
-    }
-    this.setState({
-      reactionData,
-      model,
       objectiveFlux
     })
   }

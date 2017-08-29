@@ -377,7 +377,8 @@ class TooltipComponent extends Component {
               />
               <button
                 name='knockoutButton'
-                onTouch={this.mouseDown.bind(this)}
+                onTouchStart={this.mouseDown.bind(this)}
+                onTouchEnd={this.mouseUp.bind(this)}
                 onMouseDown={this.mouseDown.bind(this)}
                 onMouseUp={this.mouseUp.bind(this)}
                 onMouseLeave={this.mouseUp.bind(this)}
@@ -390,6 +391,8 @@ class TooltipComponent extends Component {
               </button>
               <button
                 name='resetReactionButton'
+                onTouchStart={this.mouseDown.bind(this)}
+                onTouchEnd={this.mouseUp.bind(this)}
                 onMouseDown={this.mouseDown.bind(this)}
                 onMouseUp={this.mouseUp.bind(this)}
                 onMouseLeave={this.mouseUp.bind(this)}
@@ -400,6 +403,8 @@ class TooltipComponent extends Component {
               </button>
               <button
                 name='objectiveButton'
+                onTouchStart={this.mouseDown.bind(this)}
+                onTouchEnd={this.mouseUp.bind(this)}
                 onMouseDown={this.mouseDown.bind(this)}
                 onMouseUp={this.mouseUp.bind(this)}
                 onMouseLeave={this.mouseUp.bind(this)}

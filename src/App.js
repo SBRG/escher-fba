@@ -265,6 +265,8 @@ class App extends Component {
         </div>
         <button
           className='resetMapButton'
+          onTouchStart={this.mouseDown.bind(this)}
+          onTouchEnd={this.mouseUp.bind(this)}
           style={this.state.buttonStyle}
           onMouseDown={this.mouseDown.bind(this)}
           onMouseUp={this.mouseUp.bind(this)}

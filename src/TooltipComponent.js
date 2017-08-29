@@ -3,66 +3,71 @@ import { h, Component } from 'preact'
 import { Range } from 'rc-slider-preact'
 import 'rc-slider-preact/lib/index.css'
 
-const WIDTH = 500
-const HEIGHT = 185
+const WIDTH = 320
+const HEIGHT = 155
 // or: import { WIDTH } from './constants'
 
 const tooltipStyle = {
+  display: 'flex',
+  flexDirection: 'column',
+  boxSizing: 'border-box',
   width: WIDTH + 'px',
   height: HEIGHT + 'px',
   borderRadius: '2px',
   border: '1px solid #b58787',
   padding: '1.5%',
-  backgroundColor: '#fff',
+  backgroundColor: 'rgba(255, 255, 255, 1)',
   textAlign: 'left',
   fontSize: '16px',
   fontFamily: 'sans-serif',
   color: '#111',
   boxShadow: '4px 6px 20px 0px rgba(0, 0, 0, 0.4)',
-  position: 'relative'
+  position: 'relative',
+  zIndex: '3'
 }
 const interfacePanelStyle = {
-  //  boxSizing: 'border-box',
-  position: 'absolute',
-  bottom: '4%',
+  display: 'flex',
+  justifyContent: 'space-between',
+  flexDirection: 'column',
   width: '100%'
 }
 const buttonStyle = {
-  clear: 'both',
-  margin: '0% 1.5%',
   color: 'white',
   border: '1px solid #2E2F2F',
   backgroundImage: 'linear-gradient(#4F5151, #474949 6%, #3F4141)',
   backgroundColor: '#474949',
   borderColor: '#474949',
-  lineHeight: '1.42857143',
+  lineHeight: '1',
   borderRadius: '4px',
   textAlign: 'center',
   verticalAlign: 'middle',
-  cursor: 'pointer'
+  cursor: 'pointer',
+  fontSize: '14px'
 }
 const pushedButton = {
   ...buttonStyle,
   backgroundImage: 'linear-gradient(#3F4141, #474949 6%, #4F5151)'
 }
 const sliderStyle = {
-  width: '97.575534823%',
-  display: 'block',
-  margin: 'auto'
+  display: 'flex',
+  flexDirection: 'column',
+  alignSelf: 'center',
+  width: WIDTH - 22 + 'px'
 }
-const markerStyle = {
-  marginLeft: '-50%',
+const fluxDisplayStyle = {
+  alignSelf: 'center',
   color: 'black',
-  width: '100%'
-}
-const markerLabelStyle = {
-  position: 'relative',
-  color: 'black',
+  fontSize: '12px',
+  fontWeight: 'bold',
   visibility: 'visible'
 }
 const indicatorStyle = {
-  height: '10%',
-  left: '0%',
+  marginTop: '0.5%',
+  display: 'flex',
+  flexDirection: 'column',
+  alignSelf: 'center',
+  width: '14px',
+  height: '14px',
   visibility: 'visible'
 }
 const disabledStyle = {
@@ -74,7 +79,7 @@ const disabledStyle = {
 }
 const inputStyle = {
   ...buttonStyle,
-  position: 'relative',
+  // position: 'relative',
   maxWidth: '47px',
   textAlign: 'center',
   cursor: 'text'
@@ -86,11 +91,7 @@ class TooltipComponent extends Component {
     this.state = {
       lowerBoundString: '',
       upperBoundString: '',
-      markerLabelStyle: {
-        position: 'relative',
-        color: 'black',
-        visibility: 'visible'
-      }
+      tooltipStyle
     }
   }
 
@@ -114,6 +115,8 @@ class TooltipComponent extends Component {
             }
             if (nextProps.reactionData !== null) {
               fluxData.currentFlux = nextProps.reactionData[nextProps.biggId]
+            } else {
+              fluxData.currentFlux = null
             }
             break
           }
@@ -129,40 +132,37 @@ class TooltipComponent extends Component {
         }
       }
 
-      const markerPosition = (fluxData.currentFlux + nextProps.upperRange) / (2 * (1 + nextProps.upperRange))
       let textOffset = {}
-      let arrowStyle = {}
-      if (markerPosition > 0.8875 && markerPosition < 0.963) {
-        textOffset = {
-          left: -(475 * (markerPosition - 0.8875)) + '%'
+      let arrowPosition = {}
+      if (nextProps.reactionData !== null) {
+        if (Math.abs(fluxData.currentFlux) > nextProps.upperRange) {
+          arrowPosition = {
+            marginLeft: fluxData.currentFlux / Math.abs(fluxData.currentFlux) * 100 + '%'
+          }
+        } else {
+          arrowPosition = {
+            marginLeft: fluxData.currentFlux / (nextProps.upperRange + 1) * 100 + '%'
+          }
         }
-      } else if (markerPosition < 0.075 && markerPosition >= 0) {
-        textOffset = {
-          left: -(450 * (markerPosition - 0.075)) + '%'
+        if (fluxData.currentFlux > 0.65 * nextProps.upperRange) {
+          textOffset = {alignSelf: 'flex-end'}
+        } else if (fluxData.currentFlux < 0.65 * nextProps.lowerRange) {
+          textOffset = {alignSelf: 'flex-start'}
+        } else {
+          textOffset = {marginLeft: fluxData.currentFlux / (nextProps.upperRange + 1) * 100 + '%'}
         }
-      } else if (markerPosition >= 0.963) {
-        textOffset = {
-          left: -45 + '%'
-        }
-      } else if (markerPosition < 0) {
-        textOffset = {
-          left: 42.5 + '%'
-        }
-      } else if (nextProps.reactionData === null) {
+      } else {
         textOffset = {
           visibility: 'hidden'
         }
-        arrowStyle = {
+        arrowPosition = {
           visibility: 'hidden'
         }
       }
-
       this.setState({
         ...fluxData,
-        // lowerBoundString,
-        // upperBoundString,
-        markerLabelStyle: {...markerLabelStyle, ...textOffset},
-        indicatorStyle: {...indicatorStyle, ...arrowStyle},
+        fluxDisplayStyle: {...fluxDisplayStyle, ...textOffset},
+        indicatorStyle: {...indicatorStyle, ...arrowPosition},
         knockoutButton: buttonStyle,
         resetReactionButton: buttonStyle,
         objectiveButton: buttonStyle,
@@ -237,6 +237,13 @@ class TooltipComponent extends Component {
     })
   }
 
+  onTouchMove () {
+    const dragStyle = {...this.state.tooltipStyle, backgroundColor: 'rgba(255, 255, 255, 0.3)'}
+    this.setState({
+      tooltipStyle: dragStyle
+    })
+  }
+
   handleMarkerPosition (currentFlux) {
     if (this.props.reactionData !== null) {
       return currentFlux < this.props.lowerRange // Add parenthesis for better readability
@@ -289,54 +296,60 @@ class TooltipComponent extends Component {
       return (
         <div className='Tooltip'
           style={{
-            ...tooltipStyle
+            ...this.state.tooltipStyle
           }}
           >
           <div style={{fontSize: '20px', fontWeight: 'bold'}}>
             {this.props.biggId}
           </div>
-          <div style={{fontSize: '15px', marginBottom: '6px'}}>
+          <div style={{fontSize: '15px'}}>
             {this.props.name}
           </div>
-          <Range
-            style={sliderStyle}
-            min={0}
-            max={2 * (this.props.upperRange + 1)}
-            step={this.props.step}
-            value={[
-              this.fluxConverter(this.state.lowerBound),
-              this.fluxConverter(this.state.upperBound)
-            ]}
-            tipFormatter={() => null}
-            allowCross={false}
-            pushable={0}
-            onChange={f => this.sliderChange(this.boundConverter(f))}
-            onAfterChange={f => this.sliderChange(this.boundConverter(f))}
-              //  this.handleMarkerPosition(this.state.currentFlux): {{...this.state.indicatorStyle, fontSize: '20px'}, '&#11014;'}}
-              /* <div style={markerStyle}>
-                <div style={{...this.state.indicatorStyle, fontSize: '20px'}}>&#11014;</div>
-                <div style={this.state.markerLabelStyle}>
-                  Current Flux: {this.props.data}
-                </div>
-              </div>  */
-            // } //  Define outside of return function */}
-          />
-          <div name='indicator' style={indicatorStyle}>
-            <svg viewBox='0 0 100 100' height='100%' width='100%'>
-              <defs>
-                <marker id='markerArrow1' viewBox='0 0 6 6' refX='4' refY='3' orient='auto'>
-                  <path d='M5,3 L3,5 L3,1 Z' fill='black' stroke='black' />
-                </marker>
-              </defs>
-              <line x1='5' y1='3' x2='5' y2='1' stroke-width='0.5' stroke='black' marker-end={'url(#markerArrow1)'} />
-            </svg>
+          <div className='slider' style={sliderStyle}>
+            <Range
+              style={{alignSelf: 'center'}}
+              min={0}
+              max={2 * (this.props.upperRange + 1)}
+              step={this.props.step}
+              value={[
+                this.fluxConverter(this.state.lowerBound),
+                this.fluxConverter(this.state.upperBound)
+              ]}
+              marks={{[this.fluxConverter(this.state.currentFlux)]: ''}}
+              tipFormatter={() => null}
+              allowCross={false}
+              pushable={0}
+              onChange={f => this.sliderChange(this.boundConverter(f))}
+              onAfterChange={f => this.sliderChange(this.boundConverter(f))}
+                //  this.handleMarkerPosition(this.state.currentFlux): {{...this.state.indicatorStyle, fontSize: '20px'}, '&#11014;'}}
+                /* <div style={markerStyle}>
+                  <div style={{...this.state.indicatorStyle, fontSize: '20px'}}>&#11014;</div>
+                  <div style={this.state.fluxDisplayStyle}>
+                    Current Flux: {this.props.data}
+                  </div>
+                </div>  */
+              // } //  Define outside of return function */}
+            />
+            <div className='indicator' style={this.state.indicatorStyle}>
+              <svg viewBox='0 0 100 100' height='100%' width='100%'>
+                <defs>
+                  <marker id='markerArrow1' viewBox='0 0 6 6' refX='4' refY='3' orient='auto'>
+                    <path d='M5,3 L3,5 L3,1 Z' fill='black' stroke='black' />
+                  </marker>
+                </defs>
+                <line x1='50' y1='75' x2='50' y2='20' stroke-width='25' stroke='black' marker-end={'url(#markerArrow1)'} />
+              </svg>
+            </div>
+            <div className='fluxDisplay' style={this.state.fluxDisplayStyle}>
+              Current Flux: {this.state.currentFlux.toFixed(2)}
+            </div>
           </div>
           {/* Kebab case for class names?  */}
           <div className='interfacePanel' style={interfacePanelStyle}>
-            <div className='labels'>
+            <div className='labels' style={{display: 'flex', justifyContent: 'space-between'}}>
               <div
                 style={{
-                  float: 'left',
+                  //  float: 'left',
                   fontSize: '12px'
                 }}
               >
@@ -344,14 +357,14 @@ class TooltipComponent extends Component {
               </div>
               <div
                 style={{
-                  float: 'right',
+                  //  float: 'right',
                   fontSize: '12px'
                 }}
               >
               Upper bound
               </div>
             </div>
-            <div className='buttons' style={{clear: 'both'}}>
+            <div className='buttons' style={{display: 'flex', justifyContent: 'space-evenly'}}>
               <input
                 type='text'
                 name='lowerBound'
@@ -364,6 +377,7 @@ class TooltipComponent extends Component {
               />
               <button
                 name='knockoutButton'
+                onTouch={this.mouseDown.bind(this)}
                 onMouseDown={this.mouseDown.bind(this)}
                 onMouseUp={this.mouseUp.bind(this)}
                 onMouseLeave={this.mouseUp.bind(this)}

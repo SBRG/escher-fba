@@ -11,6 +11,7 @@ import map from './E coli core.Core metabolism.json'
 const _ = escher.libs.underscore
 
 const buttonStyle = {
+  fontSize: '16px',
   position: 'absolute',
   right: '2%',
   bottom: '2%',
@@ -39,7 +40,7 @@ class App extends Component {
       reactionData: null,
       objectiveFlux: 0
     }
-    this.runThrottledOptimization = _.throttle(this.runOptimization, 1000)
+    this.runThrottledOptimization = _.throttle(this.runOptimization, 10)
   }
 
   componentWillMount () {
@@ -252,7 +253,7 @@ class App extends Component {
           style={{
             position: 'absolute',
             bottom: '10px',
-            left: '20px',
+            left: '1%',
             color: 'red',
             backgroundColor: 'white',
             fontSize: '16px'

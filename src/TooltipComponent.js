@@ -237,7 +237,7 @@ class TooltipComponent extends Component {
     })
   }
 
-  onTouchMove () {
+  onTouchStart () {
     const dragStyle = {...this.state.tooltipStyle, backgroundColor: 'rgba(255, 255, 255, 0.3)'}
     this.setState({
       tooltipStyle: dragStyle
@@ -287,6 +287,13 @@ class TooltipComponent extends Component {
     this.props.sliderChange(bounds, this.props.biggId)
   }
 
+  onTouchEnd (bounds) {
+    this.sliderChange(bounds)
+    this.setState({
+      tooltipStyle
+    })
+  }
+
   resetReaction () {
     this.sliderChange([this.state.lowerBoundOld, this.state.upperBoundOld], this.props.biggId)
   }
@@ -307,6 +314,7 @@ class TooltipComponent extends Component {
           </div>
           <div className='slider' style={sliderStyle}>
             <Range
+              onBeforeChange={this.onTouchStart.bind(this)}
               style={{alignSelf: 'center'}}
               min={0}
               max={2 * (this.props.upperRange + 1)}
@@ -320,7 +328,7 @@ class TooltipComponent extends Component {
               allowCross={false}
               pushable={0}
               onChange={f => this.sliderChange(this.boundConverter(f))}
-              onAfterChange={f => this.sliderChange(this.boundConverter(f))}
+              onAfterChange={f => this.onTouchEnd(this.boundConverter(f))}
                 //  this.handleMarkerPosition(this.state.currentFlux): {{...this.state.indicatorStyle, fontSize: '20px'}, '&#11014;'}}
                 /* <div style={markerStyle}>
                   <div style={{...this.state.indicatorStyle, fontSize: '20px'}}>&#11014;</div>

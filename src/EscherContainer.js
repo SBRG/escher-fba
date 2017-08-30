@@ -71,7 +71,13 @@ class EscherContainer extends Component {
       //     }
       //   })
       // },
-      enable_keys: false,
+      enable_keys: true,
+      reaction_scale: [
+        {type: 'min', color: '#c8c8c8', size: 12},
+        {type: 'value', value: '0.01', color: '#9696ff', size: 16},
+        {type: 'value', value: '20', color: '#209123', size: 20},
+        {type: 'max', color: '#ff0000', size: 25}
+      ],
       tooltip_component: TooltipComponent
     })
     this.setState({ builder })

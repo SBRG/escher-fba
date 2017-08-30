@@ -79,16 +79,20 @@ export class Model {
     const problem = this.buildGlpkProblem()
     var smcp = new SMCP({ presolve: GLP_ON })
     const returnCode = glp_simplex(problem, smcp)
-    if (returnCode !== 0) {
-      console.log('do something')
+    var f = null
+    var x = null
+    if (returnCode === 0) {
+      // get the objective
+      f = glp_get_obj_val(problem)
+      // get the primal
+      x = {}
+      for (var i = 1; i <= glp_get_num_cols(problem); i++) {
+        x[glp_get_col_name(problem, i)] = glp_get_col_prim(problem, i)
+      }
+    } else {
+      console.log('Invalid Solution')
     }
-    // get the objective
-    var f = glp_get_obj_val(problem)
-    // get the primal
-    var x = {}
-    for (var i = 1; i <= glp_get_num_cols(problem); i++) {
-      x[glp_get_col_name(problem, i)] = glp_get_col_prim(problem, i)
-    }
+
     return new Solution(f, x)
   }
 }

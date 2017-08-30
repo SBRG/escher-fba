@@ -11,10 +11,11 @@ import map from './E coli core.Core metabolism.json'
 const _ = escher.libs.underscore
 
 const buttonStyle = {
+  marginLeft: '1%',
+  marginRight: '1%',
+  marginBottom: '2px',
+  height: '27px',
   fontSize: '16px',
-  position: 'absolute',
-  right: '2%',
-  bottom: '2%',
   color: 'white',
   clear: 'both',
   border: '1px solid #2E2F2F',
@@ -62,10 +63,9 @@ class App extends Component {
       }
     }
     let solution = this.state.model.optimize()
-    if (solution.objectiveValue < 1e-3) {
+    if (solution.objectiveValue === null) {
       reactionData = null
       objectiveFlux = 'Infeasible solution/Dead cell'
-      console.log('You killed E.coli!')
     } else {
       reactionData = solution.fluxes
       objectiveFlux = solution.objectiveValue.toFixed(3)
@@ -90,10 +90,9 @@ class App extends Component {
       }
     }
     let solution = model.optimize()
-    if (solution.objectiveValue < 1e-3) {
+    if (solution.objectiveValue === null) {
       reactionData = null
       objectiveFlux = 'Infeasible solution/Dead cell'
-      console.log('You killed E.coli!')
     } else {
       reactionData = solution.fluxes
       objectiveFlux = solution.objectiveValue.toFixed(3)
@@ -110,10 +109,9 @@ class App extends Component {
 
   runOptimization (reactionData, objectiveFlux) {
     const solution = this.state.model.optimize()
-    if (solution.objectiveValue < 1e-3) {
+    if (solution.objectiveValue === null) {
       reactionData = null
       objectiveFlux = 'Infeasible solution/Dead cell'
-      console.log('You killed E.coli!')
     } else {
       reactionData = solution.fluxes
       objectiveFlux = solution.objectiveValue.toFixed(3)
@@ -163,10 +161,9 @@ class App extends Component {
     }
     // instead call runOptimization
     const solution = model.optimize()
-    if (solution.objectiveValue < 1e-3) {
+    if (solution.objectiveValue === null) {
       reactionData = null
       objectiveFlux = 'Infeasible solution/Dead cell'
-      console.log('You killed E.coli!')
     } else {
       reactionData = solution.fluxes
       objectiveFlux = solution.objectiveValue.toFixed(3)
@@ -200,11 +197,10 @@ class App extends Component {
       }
     }
     const solution = this.state.model.optimize()
-    if (solution.objectiveValue < 1e-3) {
+    if (solution.objectiveValue === null) {
       reactionData = null
       model = this.state.model
       objectiveFlux = 'Infeasible solution/Dead cell'
-      console.log('You killed E.coli!')
     } else {
       reactionData = solution.fluxes
       model = this.state.model
@@ -231,7 +227,10 @@ class App extends Component {
   }
 
   render () {
-    // console.log('Rendering')
+    const flexDirection = window.screen.availWidth < 500
+      ? 'column'
+      : 'row'
+    // console.log(window.screen.availWidth)
     return (
       <div className='App'>
         <EscherContainer
@@ -248,33 +247,33 @@ class App extends Component {
           upperRange={25}
           step={0.1}
         />
-        <div
-          className='statusBar'
-          style={{
-            position: 'absolute',
-            bottom: '10px',
-            left: '1%',
-            color: 'red',
-            backgroundColor: 'white',
-            fontSize: '16px'
-          }}
-          >
-          Current Flux: {this.state.currentObjective}
-          <br />
-          Flux Through Objective: {this.state.objectiveFlux}
+        <div style={{display: 'flex', position: 'absolute', width: '100%', bottom: '0', flexDirection: flexDirection, justifyContent: 'space-between'}}>
+          <div
+            className='statusBar'
+            style={{
+              height: '45px',
+              color: 'red',
+              backgroundColor: 'white',
+              fontSize: '16px'
+            }}
+            >
+            Current Flux: {this.state.currentObjective}
+            <br />
+            Flux Through Objective: {this.state.objectiveFlux}
+          </div>
+          <button
+            className='resetMapButton'
+            onTouchStart={this.mouseDown.bind(this)}
+            onTouchEnd={this.mouseUp.bind(this)}
+            style={this.state.buttonStyle}
+            onMouseDown={this.mouseDown.bind(this)}
+            onMouseUp={this.mouseUp.bind(this)}
+            onMouseLeave={this.mouseUp.bind(this)}
+            onClick={() => this.resetMap()}
+            >
+            Reset Map
+          </button>
         </div>
-        <button
-          className='resetMapButton'
-          onTouchStart={this.mouseDown.bind(this)}
-          onTouchEnd={this.mouseUp.bind(this)}
-          style={this.state.buttonStyle}
-          onMouseDown={this.mouseDown.bind(this)}
-          onMouseUp={this.mouseUp.bind(this)}
-          onMouseLeave={this.mouseUp.bind(this)}
-          onClick={() => this.resetMap()}
-          >
-          Reset Map
-        </button>
       </div>
     )
   }

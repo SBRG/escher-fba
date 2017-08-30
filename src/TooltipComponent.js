@@ -4,7 +4,7 @@ import { Range } from 'rc-slider-preact'
 import 'rc-slider-preact/lib/index.css'
 
 const WIDTH = 320
-const HEIGHT = 155
+const HEIGHT = 175
 // or: import { WIDTH } from './constants'
 
 const tooltipStyle = {
@@ -42,7 +42,8 @@ const buttonStyle = {
   textAlign: 'center',
   verticalAlign: 'middle',
   cursor: 'pointer',
-  fontSize: '14px'
+  fontSize: '14px',
+  height: '23px'
 }
 const pushedButton = {
   ...buttonStyle,
@@ -79,8 +80,7 @@ const disabledStyle = {
 }
 const inputStyle = {
   ...buttonStyle,
-  // position: 'relative',
-  maxWidth: '47px',
+  width: '47%',
   textAlign: 'center',
   cursor: 'text'
 }
@@ -238,7 +238,7 @@ class TooltipComponent extends Component {
   }
 
   onTouchStart () {
-    const dragStyle = {...this.state.tooltipStyle, backgroundColor: 'rgba(255, 255, 255, 0.3)'}
+    const dragStyle = {...this.state.tooltipStyle, backgroundColor: 'rgba(255, 255, 255, 0.8)'}
     this.setState({
       tooltipStyle: dragStyle
     })
@@ -329,14 +329,6 @@ class TooltipComponent extends Component {
               pushable={0}
               onChange={f => this.sliderChange(this.boundConverter(f))}
               onAfterChange={f => this.onTouchEnd(this.boundConverter(f))}
-                //  this.handleMarkerPosition(this.state.currentFlux): {{...this.state.indicatorStyle, fontSize: '20px'}, '&#11014;'}}
-                /* <div style={markerStyle}>
-                  <div style={{...this.state.indicatorStyle, fontSize: '20px'}}>&#11014;</div>
-                  <div style={this.state.fluxDisplayStyle}>
-                    Current Flux: {this.props.data}
-                  </div>
-                </div>  */
-              // } //  Define outside of return function */}
             />
             <div className='indicator' style={this.state.indicatorStyle}>
               <svg viewBox='0 0 100 100' height='100%' width='100%'>
@@ -372,7 +364,7 @@ class TooltipComponent extends Component {
               Upper bound
               </div>
             </div>
-            <div className='buttons' style={{display: 'flex', justifyContent: 'space-evenly'}}>
+            <div className='inputs' style={{display: 'flex', justifyContent: 'space-between'}}>
               <input
                 type='text'
                 name='lowerBound'
@@ -383,6 +375,18 @@ class TooltipComponent extends Component {
                   event => this.handleKeyUp(event, [event.target.value, this.state.upperBoundString])
                 }
               />
+              <input
+                type='text'
+                name='upperBound'
+                value={this.state.upperBoundString}
+                style={inputStyle}
+                onFocus={(event) => event.target.select()}
+                onKeyUp={
+                  event => this.handleKeyUp(event, [this.state.lowerBound, event.target.value])
+                }
+              />
+            </div>
+            <div className='buttons' style={{display: 'flex', justifyContent: 'space-between', marginTop: '1%'}}>
               <button
                 name='knockoutButton'
                 onTouchStart={this.mouseDown.bind(this)}
@@ -422,16 +426,6 @@ class TooltipComponent extends Component {
               >
                 Set Objective
               </button>
-              <input
-                type='text'
-                name='upperBound'
-                value={this.state.upperBoundString}
-                style={inputStyle}
-                onFocus={(event) => event.target.select()}
-                onKeyUp={
-                  event => this.handleKeyUp(event, [this.state.lowerBound, event.target.value])
-                }
-              />
             </div>
           </div>
         </div>

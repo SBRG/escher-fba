@@ -7,8 +7,7 @@
     "@just-boris/preact-scripts": "1.0.7",
     "gh-pages": "^1.0.0",
     "glpk.js": "https://github.com/hgourvest/glpk.js",
-    "preact-compat": "^3.16.0",
-    "rc-slider-preact": "https://github.com/zakandrewking/rc-slider-preact"
+    "preact-compat": "^3.16.0"
   },
   "devDependencies": {
     "babel-eslint": "^7.2.3",

@@ -10,29 +10,6 @@ import map from './E coli core.Core metabolism.json'
 
 const _ = escher.libs.underscore
 
-const buttonStyle = {
-  marginLeft: '1%',
-  marginRight: '1%',
-  marginBottom: '2px',
-  height: '27px',
-  fontSize: '16px',
-  color: 'white',
-  clear: 'both',
-  border: '1px solid #2E2F2F',
-  backgroundImage: 'linear-gradient(#4F5151, #474949 6%, #3F4141)',
-  backgroundColor: '#474949',
-  borderColor: '#474949',
-  lineHeight: '1.42857143',
-  borderRadius: '4px',
-  textAlign: 'center',
-  cursor: 'pointer'
-}
-
-const pushedButton = {
-  ...buttonStyle,
-  backgroundImage: 'linear-gradient(#3F4141, #474949 6%, #4F5151)'
-}
-
 class App extends Component {
   constructor (props) {
     super(props)
@@ -46,7 +23,6 @@ class App extends Component {
 
   componentWillMount () {
     this.setState({
-      buttonStyle: buttonStyle,
       model: new Model(this.state.modelData),
       oldModel: new Model(this.state.modelData)
     })
@@ -214,22 +190,7 @@ class App extends Component {
     })
   }
 
-  mouseDown (event) {
-    this.setState({
-      buttonStyle: pushedButton
-    })
-  }
-
-  mouseUp (event) {
-    this.setState({
-      buttonStyle: buttonStyle
-    })
-  }
-
   render () {
-    const flexDirection = window.screen.availWidth < 500
-      ? 'column'
-      : 'row'
     // console.log(window.screen.availWidth)
     return (
       <div className='App'>
@@ -247,7 +208,7 @@ class App extends Component {
           upperRange={25}
           step={0.1}
         />
-        <div style={{display: 'flex', position: 'absolute', width: '100%', bottom: '0', flexDirection: flexDirection, justifyContent: 'space-between'}}>
+        <div className='bottomPanel'>
           <div
             className='statusBar'
             style={{
@@ -263,12 +224,6 @@ class App extends Component {
           </div>
           <button
             className='resetMapButton'
-            onTouchStart={this.mouseDown.bind(this)}
-            onTouchEnd={this.mouseUp.bind(this)}
-            style={this.state.buttonStyle}
-            onMouseDown={this.mouseDown.bind(this)}
-            onMouseUp={this.mouseUp.bind(this)}
-            onMouseLeave={this.mouseUp.bind(this)}
             onClick={() => this.resetMap()}
             >
             Reset Map

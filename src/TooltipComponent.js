@@ -2,13 +2,14 @@
 import { h, Component } from 'preact'
 import { Range } from 'rc-slider-preact'
 import 'rc-slider-preact/lib/index.css'
+import './TooltipComponent.css'
 
 const WIDTH = 320
 const HEIGHT = 175
 // or: import { WIDTH } from './constants'
 
 const tooltipStyle = {
-  display: 'flex',
+  display: '-webkit-flex',
   flexDirection: 'column',
   boxSizing: 'border-box',
   width: WIDTH + 'px',
@@ -26,31 +27,13 @@ const tooltipStyle = {
   zIndex: '3'
 }
 const interfacePanelStyle = {
-  display: 'flex',
+  display: '-webkit-flex',
   justifyContent: 'space-between',
   flexDirection: 'column',
   width: '100%'
 }
-const buttonStyle = {
-  color: 'white',
-  border: '1px solid #2E2F2F',
-  backgroundImage: 'linear-gradient(#4F5151, #474949 6%, #3F4141)',
-  backgroundColor: '#474949',
-  borderColor: '#474949',
-  lineHeight: '1',
-  borderRadius: '4px',
-  textAlign: 'center',
-  verticalAlign: 'middle',
-  cursor: 'pointer',
-  fontSize: '14px',
-  height: '23px'
-}
-const pushedButton = {
-  ...buttonStyle,
-  backgroundImage: 'linear-gradient(#3F4141, #474949 6%, #4F5151)'
-}
 const sliderStyle = {
-  display: 'flex',
+  display: '-webkit-flex',
   flexDirection: 'column',
   alignSelf: 'center',
   width: WIDTH - 22 + 'px'
@@ -64,25 +47,12 @@ const fluxDisplayStyle = {
 }
 const indicatorStyle = {
   marginTop: '0.5%',
-  display: 'flex',
+  display: '-webkit-flex',
   flexDirection: 'column',
   alignSelf: 'center',
   width: '14px',
   height: '14px',
   visibility: 'visible'
-}
-const disabledStyle = {
-  ...buttonStyle,
-  color: 'graytext',
-  backgroundImage: 'linear-gradient(#D8D8D8, #D8D8D8)',
-  clear: 'both',
-  cursor: 'not-allowed'
-}
-const inputStyle = {
-  ...buttonStyle,
-  width: '47%',
-  textAlign: 'center',
-  cursor: 'text'
 }
 
 class TooltipComponent extends Component {
@@ -98,7 +68,7 @@ class TooltipComponent extends Component {
   componentWillReceiveProps (nextProps) {
     if (nextProps.type === 'reaction' && nextProps.model !== undefined) {
       const fluxData = {}
-      if (nextProps.biggId !== this.props.biggId || nextProps.model !== this.props.model) {
+      if (nextProps.biggId !== this.props.biggId || nextProps.model !== this.props.model || nextProps.currentObjective !== this.state.currentObjective) {
         for (let i = 0, l = nextProps.model.reactions.length; i < l; i++) {
           if (nextProps.model.reactions[i].id === nextProps.biggId) {
             fluxData.lowerBound = nextProps.model.reactions[i].lower_bound
@@ -163,9 +133,6 @@ class TooltipComponent extends Component {
         ...fluxData,
         fluxDisplayStyle: {...fluxDisplayStyle, ...textOffset},
         indicatorStyle: {...indicatorStyle, ...arrowPosition},
-        knockoutButton: buttonStyle,
-        resetReactionButton: buttonStyle,
-        objectiveButton: buttonStyle,
         type: nextProps.type
       })
     } else {
@@ -223,18 +190,6 @@ class TooltipComponent extends Component {
    */
   boundConverter (array) {
     return array.map(this.tipConverter.bind(this))
-  }
-
-  mouseDown (event) {
-    this.setState({
-      [event.target.name]: pushedButton
-    })
-  }
-
-  mouseUp (event) {
-    this.setState({
-      [event.target.name]: buttonStyle
-    })
   }
 
   onTouchStart () {
@@ -341,12 +296,12 @@ class TooltipComponent extends Component {
               </svg>
             </div>
             <div className='fluxDisplay' style={this.state.fluxDisplayStyle}>
-              Current Flux: {this.state.currentFlux.toFixed(2)}
+              Current Flux: {this.state.currentFlux === null ? '' : this.state.currentFlux.toFixed(2)}
             </div>
           </div>
           {/* Kebab case for class names?  */}
           <div className='interfacePanel' style={interfacePanelStyle}>
-            <div className='labels' style={{display: 'flex', justifyContent: 'space-between'}}>
+            <div className='labels' style={{display: '-webkit-flex', justifyContent: 'space-between'}}>
               <div
                 style={{
                   //  float: 'left',
@@ -364,12 +319,11 @@ class TooltipComponent extends Component {
               Upper bound
               </div>
             </div>
-            <div className='inputs' style={{display: 'flex', justifyContent: 'space-between'}}>
+            <div className='inputPanel' style={{display: '-webkit-flex', justifyContent: 'space-between'}}>
               <input
                 type='text'
-                name='lowerBound'
+                className='input'
                 value={this.state.lowerBoundString}
-                style={inputStyle}
                 onFocus={(event) => event.target.select()}
                 onKeyUp={
                   event => this.handleKeyUp(event, [event.target.value, this.state.upperBoundString])
@@ -377,52 +331,33 @@ class TooltipComponent extends Component {
               />
               <input
                 type='text'
-                name='upperBound'
+                className='input'
                 value={this.state.upperBoundString}
-                style={inputStyle}
                 onFocus={(event) => event.target.select()}
                 onKeyUp={
                   event => this.handleKeyUp(event, [this.state.lowerBound, event.target.value])
                 }
               />
             </div>
-            <div className='buttons' style={{display: 'flex', justifyContent: 'space-between', marginTop: '1%'}}>
+            <div className='buttonPanel' style={{display: '-webkit-flex', justifyContent: 'space-between', marginTop: '3px'}}>
               <button
-                name='knockoutButton'
-                onTouchStart={this.mouseDown.bind(this)}
-                onTouchEnd={this.mouseUp.bind(this)}
-                onMouseDown={this.mouseDown.bind(this)}
-                onMouseUp={this.mouseUp.bind(this)}
-                onMouseLeave={this.mouseUp.bind(this)}
+                className='button'
                 onClick={
                   () => this.sliderChange([0, 0])
                 }
-                style={this.state.knockoutButton}
               >
                 Knockout Reaction
               </button>
               <button
-                name='resetReactionButton'
-                onTouchStart={this.mouseDown.bind(this)}
-                onTouchEnd={this.mouseUp.bind(this)}
-                onMouseDown={this.mouseDown.bind(this)}
-                onMouseUp={this.mouseUp.bind(this)}
-                onMouseLeave={this.mouseUp.bind(this)}
+                className='button'
                 onClick={() => this.resetReaction()}
-                style={this.state.resetReactionButton}
               >
                 Reset
               </button>
               <button
-                name='objectiveButton'
-                onTouchStart={this.mouseDown.bind(this)}
-                onTouchEnd={this.mouseUp.bind(this)}
-                onMouseDown={this.mouseDown.bind(this)}
-                onMouseUp={this.mouseUp.bind(this)}
-                onMouseLeave={this.mouseUp.bind(this)}
+                className='button'
                 onClick={() => this.props.setObjective(this.props.biggId)}
                 disabled={this.state.isCurrentObjective}
-                style={this.state.isCurrentObjective ? disabledStyle : this.state.objectiveButton}
               >
                 Set Objective
               </button>

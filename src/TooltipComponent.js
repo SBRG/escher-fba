@@ -264,7 +264,7 @@ class TooltipComponent extends Component {
           <div style={{fontSize: '20px', fontWeight: 'bold'}}>
             {this.props.biggId}
           </div>
-          <div style={{fontSize: '15px'}}>
+          <div style={{height: '21px', fontSize: '15px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
             {this.props.name}
           </div>
           <div className='slider' style={sliderStyle}>

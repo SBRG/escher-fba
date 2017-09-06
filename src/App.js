@@ -1,5 +1,7 @@
 /** @jsx h */
+/* eslint import/no-webpack-loader-syntax: off */
 import { h, Component } from 'preact'
+// import 'preact/devtools'
 import './App.css'
 import 'preact-range-slider/assets/index.css'
 import EscherContainer from './EscherContainer.js'
@@ -7,8 +9,11 @@ import { Model } from './COBRA.js'
 import * as escher from 'escher-vis'
 import modelData from './E coli core.json'
 import map from './E coli core.Core metabolism.json'
+import * as MyWorker from 'worker-loader!./worker.js'
 
 const _ = escher.libs.underscore
+const cobraWorker = new MyWorker()
+console.log(cobraWorker)
 
 class App extends Component {
   constructor (props) {
@@ -26,6 +31,14 @@ class App extends Component {
       model: new Model(this.state.modelData),
       oldModel: new Model(this.state.modelData)
     })
+    console.log(cobraWorker)
+    cobraWorker.postMessage(this.state.model)
+    cobraWorker.onmessage = (e) => {
+      let solution = e.optimize()
+      console.log('Data: ', solution)
+    }
+    cobraWorker.postMessage(this.state.model)
+    console.log(cobraWorker)
   }
 
   componentDidMount () {

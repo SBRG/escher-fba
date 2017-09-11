@@ -5,40 +5,32 @@ import { h, Component } from 'preact'
 import './App.css'
 import 'preact-range-slider/assets/index.css'
 import EscherContainer from './EscherContainer.js'
-import { Model } from './COBRA.js'
+import * as COBRA from './COBRA.js'
 import * as escher from 'escher-vis'
 import modelData from './E coli core.json'
 import map from './E coli core.Core metabolism.json'
-import * as MyWorker from 'worker-loader!./worker.js'
+import COBRAWorker from 'worker-loader!babel-loader!./COBRA.worker.js'
 
 const _ = escher.libs.underscore
-const cobraWorker = new MyWorker()
-console.log(cobraWorker)
+const cobraWorker = new COBRAWorker()
 
 class App extends Component {
   constructor (props) {
     super(props)
     this.state = {
       modelData,
+      model: null,
       reactionData: null,
       objectiveFlux: 0
     }
-    this.runThrottledOptimization = _.throttle(this.runOptimization, 10)
+    this.runThrottledOptimization = _.throttle(this.runOptimization, 200)
   }
 
   componentWillMount () {
     this.setState({
-      model: new Model(this.state.modelData),
-      oldModel: new Model(this.state.modelData)
+      model: COBRA.modelFromJsonData(this.state.modelData),
+      oldModel: COBRA.modelFromJsonData(this.state.modelData)
     })
-    console.log(cobraWorker)
-    cobraWorker.postMessage(this.state.model)
-    cobraWorker.onmessage = (e) => {
-      let solution = e.optimize()
-      console.log('Data: ', solution)
-    }
-    cobraWorker.postMessage(this.state.model)
-    console.log(cobraWorker)
   }
 
   componentDidMount () {
@@ -46,69 +38,81 @@ class App extends Component {
     let currentObjective = null
     let reactionData = null
     let objectiveFlux = null
+    let solution = null
     for (let i = 0, l = reactions.length; i < l; i++) {
       if (reactions[i].objective_coefficient === 1) {
         currentObjective = reactions[i].id
       }
     }
-    let solution = this.state.model.optimize()
-    if (solution.objectiveValue === null) {
-      reactionData = null
-      objectiveFlux = 'Infeasible solution/Dead cell'
-    } else {
-      reactionData = solution.fluxes
-      objectiveFlux = solution.objectiveValue.toFixed(3)
+    cobraWorker.postMessage(this.state.model)
+    cobraWorker.onmessage = (message) => {
+      solution = message.data
+      if (solution.objectiveValue === null) {
+        reactionData = null
+        objectiveFlux = 'Infeasible solution/Dead cell'
+      } else {
+        reactionData = solution.fluxes
+        objectiveFlux = solution.objectiveValue.toFixed(3)
+      }
+      this.setState({
+        currentObjective,
+        reactionData,
+        objectiveFlux
+      })
     }
-    this.setState({
-      currentObjective,
-      reactionData,
-      objectiveFlux
-    })
   }
 
   loadModel (newModel) {
-    const model = new Model(newModel)
-    const oldModel = new Model(newModel)
+    const model = COBRA.modelFromJsonData(newModel)
+    const oldModel = COBRA.modelFromJsonData(newModel)
     const reactions = model.reactions
     let currentObjective = null
     let reactionData = null
     let objectiveFlux = null
+    let solution = null
     for (let i = 0, l = reactions.length; i < l; i++) {
       if (reactions[i].objective_coefficient === 1) {
         currentObjective = reactions[i].id
       }
     }
-    let solution = model.optimize()
-    if (solution.objectiveValue === null) {
-      reactionData = null
-      objectiveFlux = 'Infeasible solution/Dead cell'
-    } else {
-      reactionData = solution.fluxes
-      objectiveFlux = solution.objectiveValue.toFixed(3)
+    cobraWorker.postMessage(model)
+    cobraWorker.onmessage = (message) => {
+      solution = message.data
+      if (solution.objectiveValue === null) {
+        reactionData = null
+        objectiveFlux = 'Infeasible solution/Dead cell'
+      } else {
+        reactionData = solution.fluxes
+        objectiveFlux = solution.objectiveValue.toFixed(3)
+      }
+      this.setState({
+        modelData: newModel,
+        model,
+        oldModel,
+        currentObjective,
+        reactionData,
+        objectiveFlux
+      })
     }
-    this.setState({
-      modelData: newModel,
-      model,
-      oldModel,
-      currentObjective,
-      reactionData,
-      objectiveFlux
-    })
   }
 
   runOptimization (reactionData, objectiveFlux) {
-    const solution = this.state.model.optimize()
-    if (solution.objectiveValue === null) {
-      reactionData = null
-      objectiveFlux = 'Infeasible solution/Dead cell'
-    } else {
-      reactionData = solution.fluxes
-      objectiveFlux = solution.objectiveValue.toFixed(3)
+    let solution = null
+    cobraWorker.postMessage(this.state.model)
+    cobraWorker.onmessage = (message) => {
+      solution = message.data
+      if (solution.objectiveValue === null) {
+        reactionData = null
+        objectiveFlux = 'Infeasible solution/Dead cell'
+      } else {
+        reactionData = solution.fluxes
+        objectiveFlux = solution.objectiveValue.toFixed(3)
+      }
+      this.setState({
+        reactionData,
+        objectiveFlux
+      })
     }
-    this.setState({
-      reactionData,
-      objectiveFlux
-    })
   }
 
   /**
@@ -138,31 +142,35 @@ class App extends Component {
    * the original model and finds the set of fluxes.
    */
   resetMap () {
-    const model = new Model(this.state.modelData)
+    const model = COBRA.modelFromJsonData(this.state.modelData)
     const reactions = model.reactions
     let currentObjective = null
     let objectiveFlux = null
     let reactionData = null
+    let solution = null
     for (let i = 0, l = reactions.length; i < l; i++) {
       if (reactions[i].objective_coefficient === 1) {
         currentObjective = reactions[i].id
       }
     }
     // instead call runOptimization
-    const solution = model.optimize()
-    if (solution.objectiveValue === null) {
-      reactionData = null
-      objectiveFlux = 'Infeasible solution/Dead cell'
-    } else {
-      reactionData = solution.fluxes
-      objectiveFlux = solution.objectiveValue.toFixed(3)
+    cobraWorker.postMessage(model)
+    cobraWorker.onmessage = (message) => {
+      solution = message.data
+      if (solution.objectiveValue === null) {
+        reactionData = null
+        objectiveFlux = 'Infeasible solution/Dead cell'
+      } else {
+        reactionData = solution.fluxes
+        objectiveFlux = solution.objectiveValue.toFixed(3)
+      }
+      this.setState({
+        model,
+        currentObjective,
+        reactionData,
+        objectiveFlux
+      })
     }
-    this.setState({
-      model,
-      currentObjective,
-      reactionData,
-      objectiveFlux
-    })
   }
 
   /**
@@ -178,6 +186,7 @@ class App extends Component {
     let objectiveFlux = null
     let reactionData = null
     let model = null
+    let solution = null
     for (let i = 0, l = reactions.length; i < l; i++) {
       if (reactions[i].id === biggId) {
         reactions[i].objective_coefficient = 1
@@ -185,22 +194,25 @@ class App extends Component {
         reactions[i].objective_coefficient = 0
       }
     }
-    const solution = this.state.model.optimize()
-    if (solution.objectiveValue === null) {
-      reactionData = null
-      model = this.state.model
-      objectiveFlux = 'Infeasible solution/Dead cell'
-    } else {
-      reactionData = solution.fluxes
-      model = this.state.model
-      objectiveFlux = solution.objectiveValue.toFixed(3)
+    cobraWorker.postMessage(this.state.model)
+    cobraWorker.onmessage = (message) => {
+      solution = message.data
+      if (solution.objectiveValue === null) {
+        reactionData = null
+        model = this.state.model
+        objectiveFlux = 'Infeasible solution/Dead cell'
+      } else {
+        reactionData = solution.fluxes
+        model = this.state.model
+        objectiveFlux = solution.objectiveValue.toFixed(3)
+      }
+      this.setState({
+        reactionData,
+        model,
+        currentObjective: biggId,
+        objectiveFlux
+      })
     }
-    this.setState({
-      reactionData,
-      model,
-      currentObjective: biggId,
-      objectiveFlux
-    })
   }
 
   render () {

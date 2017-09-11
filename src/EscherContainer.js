@@ -79,7 +79,8 @@ class EscherContainer extends Component {
         {type: 'max', color: '#ff0000', size: 25}
       ],
       tooltip_component: TooltipComponent,
-      hidden_buttons: ['Load reaction data', 'Load gene data']
+      reaction_styles: ['color', 'size', 'text', 'abs'],
+      disabled_buttons: ['Load reaction data', 'Load gene data']
     })
     this.setState({ builder })
     this.state.builder.callback_manager.set('load_model', this.props.loadModel.bind(this))

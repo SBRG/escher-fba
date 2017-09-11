@@ -7,14 +7,14 @@ import {
 } from 'glpk.js'
 
 export class Model {
-  constructor (data) {
-    this.reactions = data.reactions.map(x => ({...x}))
-    this.metabolites = data.metabolites.map(x => ({...x}))
-    this.genes = data.genes.map(x => ({...x}))
-    this.id = data.id
-    this.notes = data.notes // TODO is this an object? if so clone
-    this.description = data.description
-  }
+  // constructor (data) {
+  //   this.reactions = data.reactions.map(x => ({...x}))
+  //   this.metabolites = data.metabolites.map(x => ({...x}))
+  //   this.genes = data.genes.map(x => ({...x}))
+  //   this.id = data.id
+  //   this.notes = data.notes // TODO is this an object? if so clone
+  //   this.description = data.description
+  // }
 
   buildGlpkProblem () {
     /** Build a GLPK LP for the model */
@@ -102,4 +102,39 @@ export class Solution {
     this.objectiveValue = objectiveValue
     this.fluxes = fluxes
   }
+}
+
+export function modelFromWorkerData (data) {
+  const model = new Model()
+  model.reactions = data.reactions
+  model.metabolites = data.metabolites
+  model.genes = data.genes
+  model.id = data.id
+  model.notes = data.notes
+  model.description = data.description
+  return model
+  //  Change when model structure changes significantly from original model JSON. Outputs JSON model data.
+}
+
+export function solutionFromWorkerData ({ objectiveValue, fluxes }) {
+  return new Solution(objectiveValue, fluxes)
+}
+
+/**
+ *
+ * @param {*} data
+ */
+export function modelFromJsonData (data) {
+  const model = new Model()
+  model.reactions = data.reactions.map(x => ({...x}))
+  model.metabolites = data.metabolites.map(x => ({...x}))
+  model.genes = data.genes.map(x => ({...x}))
+  model.id = data.id
+  model.notes = data.notes // TODO is this an object? if so clone
+  model.description = data.description
+  return model
+}
+
+export function modelFromJson (jsonString) {
+  return modelFromJsonData(JSON.parse(jsonString))
 }

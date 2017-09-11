@@ -66,6 +66,7 @@ class TooltipComponent extends Component {
   }
 
   componentWillReceiveProps (nextProps) {
+    let reactionInModel = false
     if (nextProps.type === 'reaction' && nextProps.model !== undefined) {
       const fluxData = {}
       if (nextProps.biggId !== this.props.biggId || nextProps.model !== this.props.model || nextProps.currentObjective !== this.state.currentObjective) {
@@ -78,6 +79,7 @@ class TooltipComponent extends Component {
             fluxData.lowerBoundOld = nextProps.oldModel.reactions[i].lower_bound
             fluxData.upperBoundOld = nextProps.oldModel.reactions[i].upper_bound
             fluxData.name = nextProps.model.reactions[i].name
+            reactionInModel = true
             if (nextProps.currentObjective === nextProps.biggId) {
               fluxData.isCurrentObjective = true
             } else {
@@ -101,7 +103,6 @@ class TooltipComponent extends Component {
           }
         }
       }
-
       let textOffset = {}
       let arrowPosition = {}
       if (nextProps.reactionData !== null) {
@@ -131,13 +132,16 @@ class TooltipComponent extends Component {
       }
       this.setState({
         ...fluxData,
+        reactionInModel,
         fluxDisplayStyle: {...fluxDisplayStyle, ...textOffset},
         indicatorStyle: {...indicatorStyle, ...arrowPosition},
         type: nextProps.type
       })
     } else {
+      reactionInModel = false
       this.setState({
-        type: nextProps.type
+        type: nextProps.type,
+        reactionInModel
       })
     }
   }
@@ -254,7 +258,7 @@ class TooltipComponent extends Component {
   }
 
   render () {
-    if (this.state.type === 'reaction' && this.props.model !== undefined) {
+    if (this.state.type === 'reaction' && this.state.reactionInModel) {
       return (
         <div className='Tooltip'
           style={{
@@ -365,7 +369,7 @@ class TooltipComponent extends Component {
           </div>
         </div>
       )
-    } else if (this.state.type === 'reaction' && this.props.model === undefined) {
+    } else if (this.state.type === 'reaction' && !this.state.reactionInModel) {
       return (
         <div className='Tooltip'
           style={{

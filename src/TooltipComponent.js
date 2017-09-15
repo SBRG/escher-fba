@@ -265,7 +265,7 @@ class TooltipComponent extends Component {
             ...this.state.tooltipStyle
           }}
           >
-          <div style={{fontSize: '20px', fontWeight: 'bold'}}>
+          <div style={{fontSize: '20px', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
             {this.props.biggId}
           </div>
           <div style={{height: '21px', fontSize: '15px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>

@@ -67,7 +67,7 @@ class TooltipComponent extends Component {
 
   componentWillReceiveProps (nextProps) {
     let reactionInModel = false
-    if (nextProps.type === 'reaction' && nextProps.model !== undefined) {
+    if (nextProps.type === 'reaction' && nextProps.model !== (undefined || null)) {
       const fluxData = {}
       if (nextProps.biggId !== this.props.biggId || nextProps.model !== this.props.model || nextProps.currentObjective !== this.state.currentObjective) {
         for (let i = 0, l = nextProps.model.reactions.length; i < l; i++) {

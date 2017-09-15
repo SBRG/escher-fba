@@ -125,13 +125,17 @@ export function solutionFromWorkerData ({ objectiveValue, fluxes }) {
  * @param {*} data
  */
 export function modelFromJsonData (data) {
-  const model = new Model()
-  model.reactions = data.reactions.map(x => ({...x}))
-  model.metabolites = data.metabolites.map(x => ({...x}))
-  model.genes = data.genes.map(x => ({...x}))
-  model.id = data.id
-  model.notes = data.notes // TODO is this an object? if so clone
-  model.description = data.description
+  let model = new Model()
+  if (data !== null) {
+    model.reactions = data.reactions.map(x => ({...x}))
+    model.metabolites = data.metabolites.map(x => ({...x}))
+    model.genes = data.genes.map(x => ({...x}))
+    model.id = data.id
+    model.notes = data.notes // TODO is this an object? if so clone
+    model.description = data.description
+  } else {
+    model = null
+  }
   return model
 }
 

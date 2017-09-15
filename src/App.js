@@ -65,26 +65,37 @@ class App extends Component {
   loadModel (newModel) {
     const model = COBRA.modelFromJsonData(newModel)
     const oldModel = COBRA.modelFromJsonData(newModel)
-    const reactions = model.reactions
     let currentObjective = null
     let reactionData = null
     let objectiveFlux = null
     let solution = null
-    for (let i = 0, l = reactions.length; i < l; i++) {
-      if (reactions[i].objective_coefficient === 1) {
-        currentObjective = reactions[i].id
+    if (model !== null) {
+      const reactions = model.reactions
+      for (let i = 0, l = reactions.length; i < l; i++) {
+        if (reactions[i].objective_coefficient === 1) {
+          currentObjective = reactions[i].id
+        }
       }
-    }
-    cobraWorker.postMessage(model)
-    cobraWorker.onmessage = (message) => {
-      solution = message.data
-      if (solution.objectiveValue === null) {
-        reactionData = null
-        objectiveFlux = 'Infeasible solution/Dead cell'
-      } else {
-        reactionData = solution.fluxes
-        objectiveFlux = solution.objectiveValue.toFixed(3)
+      cobraWorker.postMessage(model)
+      cobraWorker.onmessage = (message) => {
+        solution = message.data
+        if (solution.objectiveValue === null) {
+          reactionData = null
+          objectiveFlux = 'Infeasible solution/Dead cell'
+        } else {
+          reactionData = solution.fluxes
+          objectiveFlux = solution.objectiveValue.toFixed(3)
+        }
+        this.setState({
+          modelData: newModel,
+          model,
+          oldModel,
+          currentObjective,
+          reactionData,
+          objectiveFlux
+        })
       }
+    } else {
       this.setState({
         modelData: newModel,
         model,

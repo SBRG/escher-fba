@@ -262,7 +262,8 @@ class TooltipComponent extends Component {
       return (
         <div className='Tooltip'
           style={{
-            ...this.state.tooltipStyle
+            ...this.state.tooltipStyle,
+            touchAction: 'none'
           }}
           >
           <div style={{fontSize: '20px', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>

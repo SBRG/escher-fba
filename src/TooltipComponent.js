@@ -26,18 +26,6 @@ const tooltipStyle = {
   position: 'relative',
   zIndex: '3'
 }
-const interfacePanelStyle = {
-  display: '-webkit-flex',
-  justifyContent: 'space-between',
-  flexDirection: 'column',
-  width: '100%'
-}
-const sliderStyle = {
-  display: '-webkit-flex',
-  flexDirection: 'column',
-  alignSelf: 'center',
-  width: WIDTH - 22 + 'px'
-}
 const fluxDisplayStyle = {
   alignSelf: 'center',
   color: 'black',
@@ -274,13 +262,13 @@ class TooltipComponent extends Component {
             touchAction: 'none'
           }}
           >
-          <div style={{fontSize: '20px', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
+          <div className='biggId'>
             {this.props.biggId}
           </div>
-          <div style={{height: '21px', fontSize: '15px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
+          <div className='name'>
             {this.props.name}
           </div>
-          <div className='slider' style={sliderStyle}>
+          <div className='slider' style={{width: WIDTH - 22 + 'px'}}>
             <Range
               onBeforeChange={this.onTouchStart.bind(this)}
               style={{alignSelf: 'center'}}
@@ -313,8 +301,8 @@ class TooltipComponent extends Component {
             </div>
           </div>
           {/* Kebab case for class names?  */}
-          <div className='interfacePanel' style={interfacePanelStyle}>
-            <div className='labels' style={{display: '-webkit-flex', justifyContent: 'space-between'}}>
+          <div className='interfacePanel'>
+            <div className='labels'>
               <div
                 style={{
                   //  float: 'left',
@@ -332,7 +320,7 @@ class TooltipComponent extends Component {
               Upper bound
               </div>
             </div>
-            <div className='inputPanel' style={{display: '-webkit-flex', justifyContent: 'space-between'}}>
+            <div className='inputPanel'>
               <input
                 type='text'
                 className='input'
@@ -352,7 +340,7 @@ class TooltipComponent extends Component {
                 }
               />
             </div>
-            <div className='buttonPanel' style={{display: '-webkit-flex', justifyContent: 'space-between', marginTop: '3px'}}>
+            <div className='buttonPanel'>
               <button
                 className='button'
                 onClick={
@@ -387,7 +375,7 @@ class TooltipComponent extends Component {
             width: '400px'
           }}
           >
-          <div style={{fontSize: '20px', fontWeight: 'bold'}}>
+          <div className='biggId'>
             {this.props.biggId} is not in the model
           </div>
         </div>

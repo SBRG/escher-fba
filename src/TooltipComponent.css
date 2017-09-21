@@ -12,6 +12,12 @@
   font-size: 90%!important;
   font-weight: 400;
   height: 23px;
+  width: auto;
+}
+
+.Tooltip .buttonPanel {
+  margin-top: 3px;
+  position: static;
 }
 
 .Tooltip .button:active {
@@ -37,4 +43,38 @@
   width: 47%;
   text-align: center;
   cursor: text;
+}
+
+.Tooltip .biggId {
+  font-size: 20px;
+  font-weight: bold;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.Tooltip .name {
+  height: 21px;
+  font-size: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.Tooltip .interfacePanel {
+  flex-direction: column;
+  width: 100%;
+}
+
+.Tooltip .labels, .Tooltip .inputPanel, .Tooltip .buttonPanel, .Tooltip .interfacePanel {
+  display: -webkit-flex;
+  display: flex;
+  justify-content: space-between;
+}
+
+.Tooltip .slider {
+  display: -webkit-flex;
+  display: flex;
+  flex-direction: column;
+  align-self: center;
 }

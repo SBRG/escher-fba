@@ -245,15 +245,7 @@ class App extends Component {
           step={0.1}
         />
         <div className='bottomPanel'>
-          <div
-            className='statusBar'
-            style={{
-              height: '45px',
-              color: 'red',
-              backgroundColor: 'white',
-              fontSize: '16px'
-            }}
-            >
+          <div className='statusBar'>
             Current Flux: {this.state.currentObjective}
             <br />
             Flux Through Objective: {this.state.objectiveFlux}

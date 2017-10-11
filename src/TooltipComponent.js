@@ -4,6 +4,7 @@ import { Range } from 'rc-slider-preact'
 import 'rc-slider-preact/lib/index.css'
 import './TooltipComponent.css'
 
+const utils = require('../node_modules/escher-vis/js/lib/utils.js')
 const WIDTH = 320
 const HEIGHT = 175
 // or: import { WIDTH } from './constants'
@@ -252,6 +253,23 @@ class TooltipComponent extends Component {
     this.sliderChange([this.state.lowerBoundOld, this.state.upperBoundOld], this.props.biggId)
   }
 
+  decompartmentalizeCheck (id, type) {
+  // ID without compartment, if metabolite.
+    return type === 'metabolite'
+    ? utils.decompartmentalize(id)[0]
+    : id
+  }
+
+  openBigg () {
+    let type = this.props.type
+    let biggId = this.props.biggId
+    let pref = 'http://bigg.ucsd.edu/'
+    let url = (type === 'gene'
+              ? pref + 'search?query=' + biggId
+              : pref + 'universal/' + type + 's/' + this.decompartmentalizeCheck(biggId, type))
+    window.open(url)
+  }
+
   render () {
     if (this.state.type === 'reaction' && this.state.reactionInModel) {
       return (
@@ -269,7 +287,7 @@ class TooltipComponent extends Component {
           </div>
           <div className='slider' style={{width: WIDTH - 22 + 'px'}}>
             <Range
-              onBeforeChange={this.onTouchStart.bind(this)}
+              onBeforeChange={() => this.onTouchStart()}
               style={{alignSelf: 'center'}}
               min={0}
               max={2 * (this.props.upperRange + 1)}
@@ -380,7 +398,32 @@ class TooltipComponent extends Component {
         </div>
       )
     } else {
-      return null
+      const decomp = this.decompartmentalizeCheck(this.props.biggId, this.props.type)
+      return (
+        <div
+          className='Tooltip'
+          style={{
+            ...this.state.tooltipStyle,
+            touchAction: 'none',
+            height: 'fit-content',
+            width: '250px'
+          }}
+        >
+          <div className='biggId'>
+            {this.props.biggId}
+          </div>
+          <div className='name'>
+            {this.props.name}
+          </div>
+          <button
+            className='button'
+            style={{width: 'fit-content', marginTop: '10px'}}
+            onClick={() => this.openBigg()}
+            >
+            Open {decomp} in BiGG Models
+          </button>
+        </div>
+      )
     }
   }
 }

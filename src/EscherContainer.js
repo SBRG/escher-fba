@@ -78,9 +78,28 @@ class EscherContainer extends Component {
         {type: 'value', value: 20, color: '#209123', size: 20},
         {type: 'max', color: '#ff0000', size: 25}
       ],
+      // reaction_scale_preset: 'namepreset',
       tooltip_component: TooltipComponent,
       reaction_styles: ['color', 'size', 'text', 'abs'],
-      disabled_buttons: ['Load reaction data', 'Load gene data']
+      disabled_buttons: ['Load reaction data', 'Load gene data'],
+      scale_presets: [
+        [
+          {type: 'min', color: '#c8c8c8', size: 12},
+          {type: 'value', value: 0.01, color: '#9696ff', size: 16},
+          {type: 'value', value: 20, color: '#209123', size: 20},
+          {type: 'max', color: '#ff0000', size: 25}
+        ],
+        [
+          { type: 'min', color: '#c8c8c8', size: 12 },
+          { type: 'median', color: '#9696ff', size: 20 },
+          { type: 'max', color: '#ff0000', size: 25 }
+        ],
+        [
+          { type: 'min', color: '#d142f4', size: 12 },
+          { type: 'median', color: '#4df441', size: 20 },
+          { type: 'max', color: '#adb742', size: 25 }
+        ]
+      ]
     })
     this.setState({ builder })
     this.state.builder.callback_manager.set('load_model', this.props.loadModel.bind(this))

@@ -82,8 +82,8 @@ class EscherContainer extends Component {
       tooltip_component: TooltipComponent,
       reaction_styles: ['color', 'size', 'text', 'abs'],
       disabled_buttons: ['Load reaction data', 'Load gene data'],
-      reaction_scale_preset: 'Default',
-      metabolite_scale_preset: 'Default'
+      reaction_scale_preset: 'GaBuGeRd',
+      metabolite_scale_preset: 'GaBuGeRd'
     })
     this.setState({ builder })
     this.state.builder.callback_manager.set('load_model', this.props.loadModel.bind(this))

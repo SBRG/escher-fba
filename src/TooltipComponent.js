@@ -4,7 +4,7 @@ import { Range } from 'rc-slider-preact'
 import 'rc-slider-preact/lib/index.css'
 import './TooltipComponent.css'
 
-const utils = require('../node_modules/escher-vis/js/lib/utils.js')
+const utils = require('escher-vis/src/utils.js')
 const WIDTH = 320
 const HEIGHT = 175
 // or: import { WIDTH } from './constants'

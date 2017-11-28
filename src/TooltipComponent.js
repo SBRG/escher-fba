@@ -357,7 +357,7 @@ class TooltipComponent extends Component {
                 }
               />
             </div>
-            <div className='buttonPanel'>
+            <div className='buttonBar'>
               <button
                 className='button'
                 onClick={

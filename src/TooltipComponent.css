@@ -20,7 +20,7 @@
   width: auto;
 }
 
-.Tooltip .buttonPanel {
+.Tooltip .buttonBar {
   margin-top: 3px;
   position: static;
 }
@@ -71,7 +71,7 @@
   width: 100%;
 }
 
-.Tooltip .labels, .Tooltip .inputPanel, .Tooltip .buttonPanel, .Tooltip .interfacePanel {
+.Tooltip .labels, .Tooltip .inputPanel, .Tooltip .buttonBar, .Tooltip .interfacePanel {
   display: -webkit-flex;
   display: flex;
   justify-content: space-between;

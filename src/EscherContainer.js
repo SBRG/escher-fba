@@ -1,7 +1,6 @@
 /** @jsx h */
 import { h, Component } from 'preact'
 import * as escher from 'escher-vis'
-import 'escher-vis/src/builder.css'
 import TooltipComponent from './TooltipComponent.js'
 //  const d3_select = escher.libs.d3_select
 const _ = escher.libs.underscore

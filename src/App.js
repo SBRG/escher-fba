@@ -154,6 +154,7 @@ class App extends Component {
    */
   resetMap () {
     const model = COBRA.modelFromJsonData(this.state.modelData)
+    if (!model) { return }
     const reactions = model.reactions
     let currentObjective = null
     let objectiveFlux = null

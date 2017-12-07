@@ -35,13 +35,14 @@ class App extends Component {
 
   componentDidMount () {
     const reactions = this.state.model.reactions
-    let currentObjective = null
+    let currentObjective = {}
     let reactionData = null
     let objectiveFlux = null
     let solution = null
     for (let i = 0, l = reactions.length; i < l; i++) {
       if (reactions[i].objective_coefficient === 1) {
-        currentObjective = reactions[i].id
+        currentObjective.biggId = reactions[i].id
+        currentObjective.coefficient = 1
       }
     }
     cobraWorker.postMessage(this.state.model)
@@ -65,7 +66,7 @@ class App extends Component {
   loadModel (newModel) {
     const model = COBRA.modelFromJsonData(newModel)
     const oldModel = COBRA.modelFromJsonData(newModel)
-    let currentObjective = null
+    let currentObjective = {}
     let reactionData = null
     let objectiveFlux = null
     let solution = null
@@ -73,7 +74,8 @@ class App extends Component {
       const reactions = model.reactions
       for (let i = 0, l = reactions.length; i < l; i++) {
         if (reactions[i].objective_coefficient === 1) {
-          currentObjective = reactions[i].id
+          currentObjective.biggId = reactions[i].id
+          currentObjective.coefficient = 1
         }
       }
       cobraWorker.postMessage(model)
@@ -156,13 +158,14 @@ class App extends Component {
     const model = COBRA.modelFromJsonData(this.state.modelData)
     if (!model) { return }
     const reactions = model.reactions
-    let currentObjective = null
+    let currentObjective = {}
     let objectiveFlux = null
     let reactionData = null
     let solution = null
     for (let i = 0, l = reactions.length; i < l; i++) {
       if (reactions[i].objective_coefficient === 1) {
-        currentObjective = reactions[i].id
+        currentObjective.biggId = reactions[i].id
+        currentObjective.coefficient = 1
       }
     }
     // instead call runOptimization
@@ -192,8 +195,9 @@ class App extends Component {
    * reactionData, changes the model in state, and tracks the current objective
    * in the currentObjective state.
    * @param {string} biggId - BiGG ID of the reaction.
+   * @param {number} coefficient - Either positive or negative 1 for maximization and minimization
    */
-  setObjective (biggId) {
+  setObjective (biggId, coefficient) {
     const reactions = this.state.model.reactions
     let objectiveFlux = null
     let reactionData = null
@@ -201,7 +205,7 @@ class App extends Component {
     let solution = null
     for (let i = 0, l = reactions.length; i < l; i++) {
       if (reactions[i].id === biggId) {
-        reactions[i].objective_coefficient = 1
+        reactions[i].objective_coefficient = coefficient
       } else {
         reactions[i].objective_coefficient = 0
       }
@@ -221,7 +225,7 @@ class App extends Component {
       this.setState({
         reactionData,
         model,
-        currentObjective: biggId,
+        currentObjective: {biggId: biggId, coefficient: coefficient},
         objectiveFlux
       })
     }
@@ -239,7 +243,7 @@ class App extends Component {
           currentObjective={this.state.currentObjective}
           sliderChange={(bounds, biggId) => this.sliderChange(bounds, biggId)}
           resetReaction={(biggId) => this.resetReaction(biggId)}
-          setObjective={(biggId) => this.setObjective(biggId)}
+          setObjective={(biggId, coefficient) => this.setObjective(biggId, coefficient)}
           loadModel={(newModel) => this.loadModel(newModel)}
           lowerRange={-25}
           upperRange={25}
@@ -247,7 +251,10 @@ class App extends Component {
         />
         <div className='bottomPanel'>
           <div className='statusBar'>
-            Current Flux: {this.state.currentObjective}
+            Current Flux: {this.state.currentObjective
+              ? this.state.currentObjective.biggId
+              : ''
+            }
             <br />
             Flux Through Objective: {this.state.objectiveFlux}
           </div>

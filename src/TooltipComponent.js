@@ -59,11 +59,14 @@ class TooltipComponent extends Component {
     let reactionInModel = false
 
     //
-    if (nextProps.type === 'reaction' && !(nextProps.model === undefined || nextProps.model === null)) {
+    if (nextProps.type === 'reaction' && !(nextProps.model === undefined ||
+      nextProps.model === null)) {
       const fluxData = {}
 
       //
-      if (nextProps.biggId !== this.props.biggId || nextProps.model !== this.props.model || nextProps.currentObjective !== this.state.currentObjective) {
+      if (nextProps.biggId !== this.props.biggId ||
+        nextProps.model !== this.props.model ||
+        nextProps.currentObjective !== this.state.currentObjective) {
         //
         for (let i = 0, l = nextProps.model.reactions.length; i < l; i++) {
           //
@@ -76,11 +79,12 @@ class TooltipComponent extends Component {
             fluxData.upperBoundOld = nextProps.oldModel.reactions[i].upper_bound
             fluxData.name = nextProps.model.reactions[i].name
             reactionInModel = true
-            if (nextProps.currentObjective === nextProps.biggId) {
+            if (nextProps.currentObjective.biggId === nextProps.biggId) {
               fluxData.isCurrentObjective = true
             } else {
               fluxData.isCurrentObjective = false
             }
+            fluxData.coefficient = nextProps.currentObjective.coefficient
             if (nextProps.reactionData !== null) {
               fluxData.currentFlux = nextProps.reactionData[nextProps.biggId]
             } else {
@@ -364,7 +368,7 @@ class TooltipComponent extends Component {
                   () => this.sliderChange([0, 0])
                 }
               >
-                Knockout Reaction
+                Knockout
               </button>
               <button
                 className='button'
@@ -374,10 +378,19 @@ class TooltipComponent extends Component {
               </button>
               <button
                 className='button'
-                onClick={() => this.props.setObjective(this.props.biggId)}
-                disabled={this.state.isCurrentObjective}
+                onClick={() => this.props.setObjective(this.props.biggId, 1)}
+                disabled={this.state.isCurrentObjective &&
+                  this.state.coefficient === 1}
               >
-                Set Objective
+                Maximize
+              </button>
+              <button
+                className='button'
+                onClick={() => this.props.setObjective(this.props.biggId, -1)}
+                disabled={this.state.isCurrentObjective &&
+                  this.state.coefficient === -1}
+              >
+                Minimize
               </button>
             </div>
           </div>

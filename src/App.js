@@ -21,7 +21,8 @@ class App extends Component {
       modelData,
       model: null,
       reactionData: null,
-      objectiveFlux: 0
+      objectiveFlux: 0,
+      helpOverlay: false
     }
     this.runThrottledOptimization = _.throttle(this.runOptimization, 200)
   }
@@ -259,11 +260,52 @@ class App extends Component {
             Flux Through Objective: {this.state.objectiveFlux}
           </div>
           <button
-            className='resetMapButton'
+            className='appButton'
+            id='reset'
             onClick={() => this.resetMap()}
             >
             Reset Map
           </button>
+          <button
+            className='appButton'
+            id='help'
+            onClick={() => this.setState({helpOverlay: true})}
+            >
+            Help
+          </button>
+        </div>
+        <div
+          className='helpOverlay'
+          style={this.state.helpOverlay ? {display: 'block'} : {display: 'none'}}
+        >
+          <div className='helpContainer'>
+            <h1>Welcome to Escher-FBA!</h1>
+            <h3>Escher-FBA is a convenient visualization tool for flux balance analysis built as an add-on to Escher. Try it out by using the buttons within the tooltip! The upper and lower bounds can also be changed by adjusting the slider bars or by entering values in the Upper Bound and Lower Bound fields</h3>
+            <br />
+            <button className='demoButton'>
+            Knockout
+            </button>
+            <h3>The knockout button sets both the upper and lower bounds of the reaction to zero, simulating a knockout of the targeted gene</h3>
+            <button className='demoButton'>
+            Reset
+            </button>
+            <h3>The reset button resets the upper and lower bounds to their original values in the loaded model</h3>
+            <button className='demoButton'>
+            Maximize
+            </button>
+            <h3>Maximize tells the problem solver to maximize the amount of flux through the target reaction</h3>
+            <button className='demoButton'>
+            Minimize
+            </button>
+            <h3>The opposite of the maximize button, minimizes the amount of flux through the target reaction</h3>
+            <button
+              className='appButton'
+              id='close'
+              onClick={() => this.setState({helpOverlay: false})}
+            >
+            Close
+            </button>
+          </div>
         </div>
       </div>
     )

@@ -13,10 +13,7 @@
   font-size: large;
 }
 
-.resetMapButton {
-  margin-left: 1px;
-  margin-right: 1px;
-  margin-bottom: 1px;
+.appButton {
   height: 27px;
   font-size: 16px;
   color: white;
@@ -25,14 +22,38 @@
   background-image: linear-gradient(#4F5151, #474949 6%, #3F4141);
   background-color: #474949;
   border-color: #474949;
-  line-height: 1.42857143;
   border-radius: 4px;
   text-align: center;
   cursor: pointer;
 }
 
-.resetMapButton:active {
+.appButton#help {
+  margin-left: 1px;
+  margin-right: 1px;
+  margin-bottom: 1px;
+}
+
+.appButton#close {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+}
+
+.appButton:active {
   background-image: linear-gradient(#3F4141, #474949 6%, #4F5151);
+}
+
+.demoButton {
+  height: 27px;
+  font-size: 16px;
+  color: white;
+  clear: both;
+  border: 1px solid #2E2F2F;
+  background-image: linear-gradient(#4F5151, #474949 6%, #3F4141);
+  background-color: #474949;
+  border-color: #474949;
+  border-radius: 4px;
+  text-align: center;
 }
 
 .bottomPanel {
@@ -54,6 +75,36 @@
   color: red;
   background-color: white;
   font-size: 16px;
+}
+
+.helpOverlay {
+  box-sizing: border-box;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9;
+  background: rgba(0,0,0,.4);
+  padding: 5% 0 80px;
+  text-align: center;
+}
+
+.helpContainer {
+  font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif!important;
+  background-color: rgba(255, 255, 255, 0.953);
+  color: #777;
+  display: inline-block;
+  position: relative;
+  width: 90%;
+  max-width: 520px;
+  height: 100%;
+  z-index: 11;
+  padding: 0 5px;
+}
+
+h3 {
+  margin-top: 0;
 }
 
 @media (max-width: 405px) {

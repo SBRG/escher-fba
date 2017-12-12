@@ -259,45 +259,62 @@ class App extends Component {
             <br />
             Flux Through Objective: {this.state.objectiveFlux}
           </div>
-          <button
-            className='appButton'
-            id='reset'
-            onClick={() => this.resetMap()}
-            >
-            Reset Map
-          </button>
-          <button
-            className='appButton'
-            id='help'
-            onClick={() => this.setState({helpOverlay: true})}
-            >
-            Help
-          </button>
+          <div>
+            <button
+              className='appButton'
+              id='reset'
+              onClick={() => this.resetMap()}
+              >
+              Reset Map
+            </button>
+            <button
+              className='appButton'
+              id='help'
+              onClick={() => this.setState({helpOverlay: true})}
+              >
+              Help
+            </button>
+          </div>
         </div>
         <div
           className='helpOverlay'
           style={this.state.helpOverlay ? {display: 'block'} : {display: 'none'}}
         >
-          <div className='helpContainer'>
-            <h1>Welcome to Escher-FBA!</h1>
-            <h3>Escher-FBA is a convenient visualization tool for flux balance analysis built as an add-on to Escher. Try it out by using the buttons within the tooltip! The upper and lower bounds can also be changed by adjusting the slider bars or by entering values in the Upper Bound and Lower Bound fields</h3>
-            <br />
-            <button className='demoButton'>
-            Knockout
-            </button>
-            <h3>The knockout button sets both the upper and lower bounds of the reaction to zero, simulating a knockout of the targeted gene</h3>
-            <button className='demoButton'>
-            Reset
-            </button>
-            <h3>The reset button resets the upper and lower bounds to their original values in the loaded model</h3>
-            <button className='demoButton'>
-            Maximize
-            </button>
-            <h3>Maximize tells the problem solver to maximize the amount of flux through the target reaction</h3>
-            <button className='demoButton'>
-            Minimize
-            </button>
-            <h3>The opposite of the maximize button, minimizes the amount of flux through the target reaction</h3>
+          <div className='helpBox'>
+            <div className='helpContainer'>
+              <h1>Welcome to Escher-FBA!</h1>
+              <h3>Escher-FBA is a convenient visualization tool for flux balance analysis built as an add-on to Escher.</h3>
+              <p>Try it out by mousing over a reaction label and using the buttons within the tooltip! The upper and lower bounds can also be changed by adjusting the slider bars or by entering values in the Upper Bound and Lower Bound fields</p>
+              <br />
+              <p>
+                {`The `}
+                <button className='demoButton'>
+                  Knockout
+                </button>
+                {` button sets both the upper and lower bounds of the reaction to zero, simulating a knockout of the targeted gene`}
+              </p>
+              <p>
+                {`The `}
+                <button className='demoButton'>
+                Reset
+                </button>
+                {` button resets the upper and lower bounds of the reaction to their original values in the loaded model`}
+              </p>
+              <p>
+                {`The `}
+                <button className='demoButton'>
+                Maximize
+                </button>
+                {` button tells the problem solver to set the objective function to maximize the amount of flux through the target reaction`}
+              </p>
+              <p>
+                {`The opposite of the maximize button, the `}
+                <button className='demoButton'>
+                Minimize
+                </button>
+                {` button sets the objective function to minimize the amount of flux through the target reaction`}
+              </p>
+            </div>
             <button
               className='appButton'
               id='close'

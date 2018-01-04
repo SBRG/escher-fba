@@ -5,13 +5,15 @@
   "private": true,
   "dependencies": {
     "@just-boris/preact-scripts": "1.0.7",
+    "babel-loader": "^7.1.2",
     "gh-pages": "^1.0.0",
     "glpk.js": "https://github.com/hgourvest/glpk.js",
-    "preact-compat": "^3.16.0"
+    "preact-compat": "^3.16.0",
+    "rc-slider-preact": "https://github.com/zakandrewking/rc-slider-preact.git"
   },
   "devDependencies": {
     "babel-eslint": "^7.2.3",
-    "escher-vis": "^1.6.0",
+    "escher": "^1.6.0",
     "lodash": "^4.17.4",
     "preact": "^8.2.1",
     "preact-range-slider": "^0.1.2",

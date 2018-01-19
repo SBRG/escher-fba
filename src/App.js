@@ -248,7 +248,7 @@ class App extends Component {
           loadModel={(newModel) => this.loadModel(newModel)}
           lowerRange={-25}
           upperRange={25}
-          step={0.1}
+          step={0.01}
         />
         <div className='bottomPanel'>
           <div className='statusBar'>

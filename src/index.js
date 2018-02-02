@@ -1,5 +1,6 @@
 import { h, render } from 'preact'
 import Router from 'preact-router'
+import createHashHistory from 'history/createHashHistory'
 import App from './App'
 import registerServiceWorker from './registerServiceWorker'
 import './index.css'
@@ -8,13 +9,13 @@ import screenshot from './Screen.png'
 /** @jsx h */
 
 const Main = () => (
-  <Router>
+  <Router history={createHashHistory()}>
     <Home path='/' />
     <Application path='/app' />
   </Router>
 )
 
-const Home = ({ match }) => (
+const Home = () => (
   <div className='splashPage'>
     <div id='titleBar'>
       <img src={logo} alt='' width='250' />

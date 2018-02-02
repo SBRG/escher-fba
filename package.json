@@ -8,6 +8,7 @@
     "babel-loader": "^7.1.2",
     "gh-pages": "^1.0.0",
     "glpk.js": "https://github.com/hgourvest/glpk.js",
+    "history": "^4.7.2",
     "preact-compat": "^3.16.0",
     "preact-router": "^2.6.0",
     "rc-slider-preact": "https://github.com/zakandrewking/rc-slider-preact.git"

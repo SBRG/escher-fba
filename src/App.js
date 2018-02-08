@@ -6,8 +6,8 @@ import './App.css'
 import EscherContainer from './EscherContainer.js'
 import * as COBRA from './COBRA.js'
 import * as escher from 'escher'
-import modelData from './E coli core.json'
-import map from './E coli core.Core metabolism.json'
+import modelData from './data/E coli core.json'
+import map from './data/E coli core.Core metabolism.json'
 import COBRAWorker from 'worker-loader!babel-loader!./COBRA.worker.js'
 
 const _ = escher.libs.underscore

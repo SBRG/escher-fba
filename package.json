@@ -11,18 +11,12 @@
     "history": "^4.7.2",
     "preact-compat": "^3.16.0",
     "preact-router": "^2.6.0",
-    "rc-slider-preact": "https://github.com/zakandrewking/rc-slider-preact.git"
-  },
-  "devDependencies": {
+    "rc-slider-preact": "https://github.com/zakandrewking/rc-slider-preact.git",
     "babel-eslint": "^7.2.3",
-    "escher": "^1.6.0",
-    "lodash": "^4.17.4",
+    "escher": "^1.7.0-beta.1",
     "preact": "^8.2.1",
-    "preact-range-slider": "^0.1.2",
-    "react-app-rewired": "^1.2.5",
     "snazzy": "^7.0.0",
     "standard": "^10.0.2",
-    "tslib": "^1.7.1",
     "worker-loader": "^0.8.1"
   },
   "scripts": {

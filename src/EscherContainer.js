@@ -2,7 +2,6 @@
 import { h, Component } from 'preact'
 import * as escher from 'escher'
 import TooltipComponent from './TooltipComponent.js'
-//  const d3_select = escher.libs.d3_select
 const _ = escher.libs.underscore
 const Builder = escher.Builder
 
@@ -15,7 +14,9 @@ class EscherContainer extends Component {
   }
 
   //  Enables Escher handling DOM
-  shouldComponentUpdate = () => false
+  shouldComponentUpdate () {
+    return false
+  }
 
   componentWillReceiveProps (nextProps) {
     if (this.state.builder === null) {
@@ -62,14 +63,6 @@ class EscherContainer extends Component {
   componentDidMount () {
     const builder = new Builder(this.props.map, this.props.model, null, this.base, {
       fill_screen: true,
-      // first_load_callback: builder => {
-      //   builder.selection.select('.menu').selectAll('button').each(function () => {
-      //     if (button.text === 'Load reaction data') {
-      //       this.style('color', 'grey')
-      //       this.attr('disabled', true)
-      //     }
-      //   })
-      // },
       enable_keys: true,
       reaction_scale: [
         {type: 'min', color: '#c8c8c8', size: 12},
@@ -82,7 +75,8 @@ class EscherContainer extends Component {
       reaction_styles: ['color', 'size', 'text', 'abs'],
       disabled_buttons: ['Load reaction data', 'Load gene data'],
       reaction_scale_preset: 'GaBuGeRd',
-      metabolite_scale_preset: 'GaBuGeRd'
+      metabolite_scale_preset: 'GaBuGeRd',
+      never_ask_before_quit: true
     })
     this.setState({ builder })
     this.state.builder.callback_manager.set('load_model', this.props.loadModel.bind(this))

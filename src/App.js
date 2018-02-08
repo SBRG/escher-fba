@@ -3,7 +3,6 @@
 import { h, Component } from 'preact'
 // import 'preact/devtools'
 import './App.css'
-import 'preact-range-slider/assets/index.css'
 import EscherContainer from './EscherContainer.js'
 import * as COBRA from './COBRA.js'
 import * as escher from 'escher'

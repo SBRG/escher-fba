@@ -12,45 +12,45 @@ class Homepage extends Component {
   render () {
     return (
       <div className='splashPage'>
-          <div id='titleBar'>
+        <div id='titleBar'>
           <img src={logo} alt='' width='250' />
           <div id='titleBox'>
-              <h1 id='title'>ESCHER-FBA</h1>
+            <h1 id='title'>ESCHER-FBA</h1>
           </div>
-          </div>
-          <h3>Escher-FBA is a convenient visualization tool for flux balance analysis built as an add-on to Escher.</h3>
-          <p>Try it out by mousing over a reaction label and using the buttons within the tooltip! The upper and lower bounds can also be changed by adjusting the slider bars or by entering values in the Upper Bound and Lower Bound fields</p>
-          <br />
-          <p>
+        </div>
+        <h3>Escher-FBA is a convenient visualization tool for flux balance analysis built as an add-on to Escher.</h3>
+        <p>Try it out by mousing over a reaction label and using the buttons within the tooltip! The upper and lower bounds can also be changed by adjusting the slider bars or by entering values in the Upper Bound and Lower Bound fields</p>
+        <br />
+        <p>
           {`The `}
           <button className='demoButton'>
               Knockout
           </button>
           {` button sets both the upper and lower bounds of the reaction to zero, simulating a knockout of the targeted gene`}
-          </p>
-          <p>
+        </p>
+        <p>
           {`The `}
           <button className='demoButton'>
           Reset
           </button>
           {` button resets the upper and lower bounds of the reaction to their original values in the loaded model`}
-          </p>
-          <p>
+        </p>
+        <p>
           {`The `}
           <button className='demoButton'>
           Maximize
           </button>
           {` button tells the problem solver to set the objective function to maximize the amount of flux through the target reaction`}
-          </p>
-          <p>
+        </p>
+        <p>
           {`The opposite of the maximize button, the `}
           <button className='demoButton'>
           Minimize
           </button>
           {` button sets the objective function to minimize the amount of flux through the target reaction`}
-          </p>
-          <p><b>Click the image below to go to the application</b></p>
-          <a href='/app'><img src={screenshot} alt='' width='300' /></a>
+        </p>
+        <p><b>Click the image below to go to the application</b></p>
+        <a href='/app'><img src={screenshot} alt='' width='300' /></a>
       </div>
     )
   }

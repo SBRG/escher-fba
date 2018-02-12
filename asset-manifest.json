@@ -1,6 +1,10 @@
 {
-  "main.css": "static/css/main.62693b14.css",
-  "main.css.map": "static/css/main.62693b14.css.map",
-  "main.js": "static/js/main.8de54fc3.js",
-  "main.js.map": "static/js/main.8de54fc3.js.map"
+  "main.css": "/escher-fba/static/css/main.8d2f6a3d.css",
+  "main.css.map": "/escher-fba/static/css/main.8d2f6a3d.css.map",
+  "main.js": "/escher-fba/static/js/main.0835d2c7.js",
+  "main.js.map": "/escher-fba/static/js/main.0835d2c7.js.map",
+  "static/media/escher-logo.png": "/escher-fba/static/media/escher-logo.e85bdc7b.png",
+  "static/media/escher-logo@2x.png": "/escher-fba/static/media/escher-logo@2x.e4bcf524.png",
+  "static/media/screen.png": "/escher-fba/static/media/screen.8e0ccf2b.png",
+  "static/media/screen@2x.png": "/escher-fba/static/media/screen@2x.45190510.png"
 }

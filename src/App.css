@@ -1,3 +1,13 @@
+a:hover, a:visited, a:focus {
+  color: #CF6965;
+  text-decoration: underline;
+}
+
+a {
+  color: #d9230f;
+  text-decoration: none;
+}
+
 .App {
   text-align: center;
 }
@@ -25,6 +35,13 @@
   text-align: center;
   cursor: pointer;
   padding: 5px;
+  text-decoration: none;
+  font-family: Open Sans, Helvetica Neue, Helvetica, Arial, sans-serif;
+  font-size: 18px;
+}
+.appButton:hover, .appButton:visited, .appButton:focus {
+  color: white;
+  text-decoration: none;
 }
 
 .appButton#help {
@@ -39,11 +56,18 @@
   right: 25px;
 }
 
+.appButton#home {
+  margin-left: 4px;
+  margin-right: 4px;
+  margin-bottom: 1px;
+}
+
 .appButton:active {
   background-image: linear-gradient(#3F4141, #474949 6%, #4F5151);
 }
 
 .demoButton {
+  margin: 0 3px;
   height: 27px;
   font-size: 16px;
   color: white;
@@ -108,9 +132,10 @@
   width: 100%;
   max-width: 520px;
   height: 100%;
-  padding: 0 10px;
+  padding: 0 15px;
   padding-bottom: 20px;
   overflow-y: scroll;
+  border-radius: 3px;
 }
 
 h3 {

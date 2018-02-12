@@ -4,26 +4,21 @@
   "homepage": "https://sbrg.github.io/escher-fba",
   "private": true,
   "dependencies": {
-    "@just-boris/preact-scripts": "1.0.7",
+    "@just-boris/preact-scripts": "1.1.0",
+    "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
+    "escher": "^1.7.0-beta.1",
     "gh-pages": "^1.0.0",
     "glpk.js": "https://github.com/hgourvest/glpk.js",
     "history": "^4.7.2",
-    "preact-compat": "^3.16.0",
+    "preact": "^8.2.7",
+    "preact-compat": "^3.18.0",
     "preact-router": "^2.6.0",
-    "rc-slider-preact": "https://github.com/zakandrewking/rc-slider-preact.git"
-  },
-  "devDependencies": {
-    "babel-eslint": "^7.2.3",
-    "escher": "^1.6.0",
-    "lodash": "^4.17.4",
-    "preact": "^8.2.1",
-    "preact-range-slider": "^0.1.2",
-    "react-app-rewired": "^1.2.5",
+    "rc-slider-preact": "https://github.com/zakandrewking/rc-slider-preact.git",
     "snazzy": "^7.0.0",
-    "standard": "^10.0.2",
-    "tslib": "^1.7.1",
-    "worker-loader": "^0.8.1"
+    "standard": "^10.0.3",
+    "webpack": "^3.10.0",
+    "worker-loader": "^1.1.0"
   },
   "scripts": {
     "predeploy": "npm run build",

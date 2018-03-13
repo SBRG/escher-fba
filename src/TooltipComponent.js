@@ -56,15 +56,18 @@ class TooltipComponent extends Component {
   }
 
   componentWillReceiveProps (nextProps) {
-    //
+    // By default, reaction is not in model
     let reactionInModel = false
 
-    //
+    // If the selected map object is a reaction and there is a model, collect the necessary 
+    // flux data and calculate placement of arrows and current flux label.
+    // Otherwise, only pass the type to the tooltip.
     if (nextProps.type === 'reaction' && !(nextProps.model === undefined ||
       nextProps.model === null)) {
       const fluxData = {}
 
-      //
+      // Only updates all of the flux data when the reaction, model, or objective changes. 
+      // Otherwise only updates the current flux.
       if (nextProps.biggId !== this.props.biggId ||
         nextProps.model !== this.props.model ||
         nextProps.currentObjective !== this.state.currentObjective) {
@@ -104,6 +107,7 @@ class TooltipComponent extends Component {
           }
         }
       }
+      // For calculating placement of the current flux indicator arrow and label
       let textOffset = {}
       let arrowPosition = {}
       if (nextProps.reactionData !== null) {

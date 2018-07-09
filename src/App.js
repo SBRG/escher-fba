@@ -22,7 +22,8 @@ class App extends Component {
       model: null,
       reactionData: null,
       objectiveFlux: 0,
-      helpOverlay: false
+      helpOverlay: false,
+      objectives: {}
     }
     this.runThrottledOptimization = _.throttle(this.runOptimization, 200)
   }
@@ -36,11 +37,13 @@ class App extends Component {
 
   componentDidMount () {
     const reactions = [...this.state.model.reactions]
-    let currentObjective = {}
+    const currentObjective = {}
+    const objectives = Object.assign({}, this.state.objectives)
     for (let i = 0, l = reactions.length; i < l; i++) {
       if (reactions[i].objective_coefficient === 1) {
         currentObjective.biggId = reactions[i].id
         currentObjective.coefficient = 1
+        objectives[reactions[i].id] = 1
         break
       }
     }
@@ -49,7 +52,8 @@ class App extends Component {
         ...prevState.model,
         reactions
       },
-      currentObjective
+      currentObjective,
+      objectives
     }))
     this.runThrottledOptimization()
   }
@@ -168,11 +172,20 @@ class App extends Component {
    */
   setObjective (biggId, coefficient) {
     const reactions = [...this.state.model.reactions]
+    const objectives = Object.assign({}, this.state.objectives)
+    if (objectives[biggId] === coefficient) {
+      objectives[biggId] = 0
+    } else {
+      objectives[biggId] = coefficient
+    }
     for (let i = 0; i < reactions.length; i++) {
       if (reactions[i].id === biggId) {
-        reactions[i].objective_coefficient = coefficient
-      } else {
-        reactions[i].objective_coefficient = 0
+        if (reactions[i].objective_coefficient === coefficient) {
+          reactions[i].objective_coefficient = 0
+        } else {
+          reactions[i].objective_coefficient = coefficient
+        }
+        break
       }
     }
     this.setState(prevState => ({
@@ -180,7 +193,8 @@ class App extends Component {
         ...prevState.model,
         reactions
       },
-      currentObjective: {biggId: biggId, coefficient: coefficient}
+      currentObjective: {biggId: biggId, coefficient: coefficient},
+      objectives
     }))
     this.runThrottledOptimization()
   }

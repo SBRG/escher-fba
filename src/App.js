@@ -83,7 +83,6 @@ class App extends Component {
       if (solution.objectiveValue !== null) {
         reactionData = solution.fluxes
         objectiveFlux = solution.objectiveValue.toFixed(3)
-        console.log(solution)
       }
       this.setState({
         reactionData,
@@ -156,11 +155,9 @@ class App extends Component {
     if (objectives[reactions[index].id] === coefficient && Object.keys(objectives).length > 1) {
       reactions[index].objective_coefficient = 0
       delete objectives[biggId]
-      console.log(this.state.model.reactions[index].objective_coefficient, this.state.model.reactions[index].id)
     } else {
       reactions[index].objective_coefficient = coefficient
       objectives[biggId] = coefficient
-      console.log(this.state.model.reactions[index].objective_coefficient, this.state.model.reactions[index].id)
     }
     this.setState(prevState => ({
       model: {
@@ -181,7 +178,7 @@ class App extends Component {
           oldModel={this.state.oldModel}
           map={map}
           reactionData={this.state.reactionData}
-          currentObjective={this.state.currentObjective}
+          objectives={this.state.objectives}
           sliderChange={(bounds, biggId) => this.sliderChange(bounds, biggId)}
           resetReaction={(biggId) => this.resetReaction(biggId)}
           setObjective={(biggId, coefficient) => this.setObjective(biggId, coefficient)}

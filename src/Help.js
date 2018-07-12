@@ -12,7 +12,8 @@ class Help extends Component {
           Try it out by mousing over a reaction label and using the buttons
           within the tooltip! The upper and lower bounds can also be changed by
           adjusting the slider bars or by entering values in the Upper Bound and
-          Lower Bound fields
+          Lower Bound fields. Please note that while you can set any number of 
+          reactions to be maximized or minimized, at least one needs to be set.
         </p>
 
         <br/>
@@ -32,7 +33,7 @@ class Help extends Component {
         <p>
           The <button className='demoButton'>Maximize</button> button tells the
           problem solver to set the objective function to maximize the amount of
-          flux through the target reaction.
+          flux through the target reaction. 
         </p>
 
         <p>

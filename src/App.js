@@ -36,46 +36,27 @@ class App extends Component {
   }
 
   componentDidMount () {
-    const reactions = [...this.state.model.reactions]
-    const currentObjective = {}
-    const objectives = Object.assign({}, this.state.objectives)
-    for (let i = 0, l = reactions.length; i < l; i++) {
-      if (reactions[i].objective_coefficient === 1) {
-        currentObjective.biggId = reactions[i].id
-        currentObjective.coefficient = 1
-        objectives[reactions[i].id] = 1
-        break
+    for (let reaction of this.state.model.reactions) {
+      if (reaction.objective_coefficient !== 0) {
+        this.setObjective(reaction.id, reaction.objective_coefficient)
       }
     }
-    this.setState(prevState => ({
-      model: {
-        ...prevState.model,
-        reactions
-      },
-      currentObjective,
-      objectives
-    }))
     this.runThrottledOptimization()
   }
 
   loadModel (newModel) {
     const model = COBRA.modelFromJsonData(newModel)
     const oldModel = COBRA.modelFromJsonData(newModel)
-    let currentObjective = {}
     if (model !== null) {
-      const reactions = model.reactions
-      for (let i = 0; i < reactions.length; i++) {
-        if (reactions[i].objective_coefficient === 1) {
-          currentObjective.biggId = reactions[i].id
-          currentObjective.coefficient = 1
-          break
+      for (let reaction of this.state.model.reactions) {
+        if (reaction.objective_coefficient !== 0) {
+          this.setObjective(reaction.id, reaction.objective_coefficient)
         }
       }
       this.setState({
         modelData: newModel,
         model,
-        oldModel,
-        currentObjective
+        oldModel
       })
       this.runThrottledOptimization()
     } else {
@@ -83,7 +64,6 @@ class App extends Component {
         modelData: newModel,
         model,
         oldModel,
-        currentObjective,
         reactionData: null,
         objectiveFlux: null
       })
@@ -103,6 +83,7 @@ class App extends Component {
       if (solution.objectiveValue !== null) {
         reactionData = solution.fluxes
         objectiveFlux = solution.objectiveValue.toFixed(3)
+        console.log(solution)
       }
       this.setState({
         reactionData,
@@ -146,17 +127,15 @@ class App extends Component {
     const model = COBRA.modelFromJsonData(this.state.modelData)
     if (!model) { return }
     const reactions = model.reactions
-    let currentObjective = {}
+    const objectives = Object.assign({}, this.state.objectives)
     for (let i = 0, l = reactions.length; i < l; i++) {
-      if (reactions[i].objective_coefficient === 1) {
-        currentObjective.biggId = reactions[i].id
-        currentObjective.coefficient = 1
+      if (reactions[i].objective_coefficient !== 0) {
+        objectives[reactions[i].id] = reactions[i].objective_coefficient
       }
-      break
     }
     this.setState({
       model,
-      currentObjective
+      currentObjective: Object.keys(objectives).join(', ')
     })
     this.runThrottledOptimization()
   }
@@ -173,34 +152,28 @@ class App extends Component {
   setObjective (biggId, coefficient) {
     const reactions = [...this.state.model.reactions]
     const objectives = Object.assign({}, this.state.objectives)
-    if (objectives[biggId] === coefficient) {
-      objectives[biggId] = 0
+    const index = reactions.findIndex(x => x.id === biggId)
+    if (objectives[reactions[index].id] === coefficient && Object.keys(objectives).length > 1) {
+      reactions[index].objective_coefficient = 0
+      delete objectives[biggId]
+      console.log(this.state.model.reactions[index].objective_coefficient, this.state.model.reactions[index].id)
     } else {
+      reactions[index].objective_coefficient = coefficient
       objectives[biggId] = coefficient
-    }
-    for (let i = 0; i < reactions.length; i++) {
-      if (reactions[i].id === biggId) {
-        if (reactions[i].objective_coefficient === coefficient) {
-          reactions[i].objective_coefficient = 0
-        } else {
-          reactions[i].objective_coefficient = coefficient
-        }
-        break
-      }
+      console.log(this.state.model.reactions[index].objective_coefficient, this.state.model.reactions[index].id)
     }
     this.setState(prevState => ({
       model: {
         ...prevState.model,
         reactions
       },
-      currentObjective: {biggId: biggId, coefficient: coefficient},
+      currentObjective: Object.keys(objectives).join(', '),
       objectives
     }))
     this.runThrottledOptimization()
   }
 
   render () {
-    // console.log(window.screen.availWidth)
     return (
       <div className='App'>
         <EscherContainer
@@ -220,7 +193,7 @@ class App extends Component {
         <div className='bottomPanel'>
           <div className='statusBar'>
             Current Flux: {this.state.currentObjective
-              ? this.state.currentObjective.biggId
+              ? this.state.currentObjective
               : ''
             }
             <br />

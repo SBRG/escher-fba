@@ -126,7 +126,7 @@ class App extends Component {
     const model = COBRA.modelFromJsonData(this.state.modelData)
     if (!model) { return }
     const reactions = model.reactions
-    const objectives = Object.assign({}, this.state.objectives)
+    const objectives = {}
     for (let i = 0, l = reactions.length; i < l; i++) {
       if (reactions[i].objective_coefficient !== 0) {
         objectives[reactions[i].id] = reactions[i].objective_coefficient

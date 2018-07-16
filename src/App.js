@@ -199,6 +199,13 @@ class App extends Component {
           <div>
             <button
               className='appButton'
+              id='compound'
+              onClick={() => console.log('pressed')}
+              >
+              Toggle Compound Objectives
+            </button>
+            <button
+              className='appButton'
               id='reset'
               onClick={() => this.resetMap()}
               >

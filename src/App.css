@@ -38,6 +38,7 @@ a {
   text-decoration: none;
   font-family: Open Sans, Helvetica Neue, Helvetica, Arial, sans-serif;
   font-size: 18px;
+  margin-right: 4px;
 }
 .appButton:hover, .appButton:visited, .appButton:focus {
   color: white;
@@ -45,8 +46,6 @@ a {
 }
 
 .appButton#help {
-  margin-left: 4px;
-  margin-right: 4px;
   margin-bottom: 1px;
 }
 
@@ -57,7 +56,6 @@ a {
 }
 
 .appButton#home {
-  margin-left: 4px;
   margin-right: 4px;
   margin-bottom: 1px;
 }

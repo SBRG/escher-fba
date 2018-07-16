@@ -23,7 +23,8 @@ class App extends Component {
       reactionData: null,
       objectiveFlux: 0,
       helpOverlay: false,
-      objectives: {}
+      objectives: {},
+      compoundObjectives: false
     }
     this.runThrottledOptimization = _.throttle(this.runOptimization, 200)
   }
@@ -150,14 +151,26 @@ class App extends Component {
    */
   setObjective (biggId, coefficient) {
     const reactions = [...this.state.model.reactions]
-    const objectives = Object.assign({}, this.state.objectives)
     const index = reactions.findIndex(x => x.id === biggId)
-    if (objectives[reactions[index].id] === coefficient && Object.keys(objectives).length > 1) {
-      reactions[index].objective_coefficient = 0
-      delete objectives[biggId]
+    let objectives = {}
+    if (this.state.compoundObjectives) {
+      objectives = Object.assign({}, this.state.objectives)
+      if (objectives[reactions[index].id] === coefficient && Object.keys(objectives).length > 1) {
+        reactions[index].objective_coefficient = 0
+        delete objectives[biggId]
+      } else {
+        reactions[index].objective_coefficient = coefficient
+        objectives[biggId] = coefficient
+      }
     } else {
-      reactions[index].objective_coefficient = coefficient
-      objectives[biggId] = coefficient
+      for (let reaction of reactions) {
+        if (reaction.id === biggId) {
+          reaction.objective_coefficient = coefficient
+          objectives[biggId] = coefficient
+        } else {
+          reaction.objective_coefficient = 0
+        }
+      }
     }
     this.setState(prevState => ({
       model: {
@@ -168,6 +181,20 @@ class App extends Component {
       objectives
     }))
     this.runThrottledOptimization()
+  }
+
+  toggleCompoundObjectives () {
+    this.setState({
+      compoundObjectives: !this.state.compoundObjectives
+    })
+    const model = COBRA.modelFromJsonData(this.state.modelData)
+    if (!model) { return }
+    for (let reaction of model.reactions) {
+      if (reaction.objective_coefficient !== 0) {
+        this.setObjective(reaction.id, reaction.objective_coefficient)
+        break
+      }
+    }
   }
 
   render () {
@@ -200,9 +227,9 @@ class App extends Component {
             <button
               className='appButton'
               id='compound'
-              onClick={() => console.log('pressed')}
+              onClick={() => this.toggleCompoundObjectives()}
               >
-              Toggle Compound Objectives
+              Toggle Compound Objectives {this.state.compoundObjectives ? 'Off' : 'On'}
             </button>
             <button
               className='appButton'

@@ -379,22 +379,24 @@ class TooltipComponent extends Component {
               <button
                 className={
                   Object.keys(this.props.objectives).includes(this.props.biggId) &&
-                  this.state.coefficient === 1 
-                    ? 'activeButton' 
+                  this.state.coefficient === 1
+                    ? 'activeButton'
                     : 'button'
                 }
                 onClick={() => this.props.setObjective(this.props.biggId, 1)}
+                disabled={Object.keys(this.props.objectives).length = 1 && this.props.objectives[this.props.biggId]}
               >
                 Maximize
               </button>
               <button
                 className={
                   Object.keys(this.props.objectives).includes(this.props.biggId) &&
-                  this.state.coefficient === -1 
-                    ? 'activeButton' 
+                  this.state.coefficient === -1
+                    ? 'activeButton'
                     : 'button'
                 }
                 onClick={() => this.props.setObjective(this.props.biggId, -1)}
+                disabled={Object.keys(this.props.objectives).length = 1 && this.props.objectives[this.props.biggId]}
               >
                 Minimize
               </button>

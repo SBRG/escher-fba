@@ -22,7 +22,9 @@ class App extends Component {
       model: null,
       reactionData: null,
       objectiveFlux: 0,
-      helpOverlay: false
+      helpOverlay: false,
+      objectives: {},
+      compoundObjectives: false
     }
     this.runThrottledOptimization = _.throttle(this.runOptimization, 200)
   }
@@ -35,90 +37,51 @@ class App extends Component {
   }
 
   componentDidMount () {
-    const reactions = this.state.model.reactions
-    let currentObjective = {}
-    let reactionData = null
-    let objectiveFlux = null
-    let solution = null
-    for (let i = 0, l = reactions.length; i < l; i++) {
-      if (reactions[i].objective_coefficient === 1) {
-        currentObjective.biggId = reactions[i].id
-        currentObjective.coefficient = 1
+    for (let reaction of this.state.model.reactions) {
+      if (reaction.objective_coefficient !== 0) {
+        this.setObjective(reaction.id, reaction.objective_coefficient)
       }
     }
-    cobraWorker.postMessage(this.state.model)
-    cobraWorker.onmessage = (message) => {
-      solution = message.data
-      if (solution.objectiveValue === null) {
-        reactionData = null
-        objectiveFlux = 'Infeasible solution/Dead cell'
-      } else {
-        reactionData = solution.fluxes
-        objectiveFlux = solution.objectiveValue.toFixed(3)
-      }
-      this.setState({
-        currentObjective,
-        reactionData,
-        objectiveFlux
-      })
-    }
+    this.runThrottledOptimization()
   }
 
   loadModel (newModel) {
     const model = COBRA.modelFromJsonData(newModel)
     const oldModel = COBRA.modelFromJsonData(newModel)
-    let currentObjective = {}
-    let reactionData = null
-    let objectiveFlux = null
-    let solution = null
     if (model !== null) {
-      const reactions = model.reactions
-      for (let i = 0, l = reactions.length; i < l; i++) {
-        if (reactions[i].objective_coefficient === 1) {
-          currentObjective.biggId = reactions[i].id
-          currentObjective.coefficient = 1
+      for (let reaction of this.state.model.reactions) {
+        if (reaction.objective_coefficient !== 0) {
+          this.setObjective(reaction.id, reaction.objective_coefficient)
         }
       }
-      cobraWorker.postMessage(model)
-      cobraWorker.onmessage = (message) => {
-        solution = message.data
-        if (solution.objectiveValue === null) {
-          reactionData = null
-          objectiveFlux = 'Infeasible solution/Dead cell'
-        } else {
-          reactionData = solution.fluxes
-          objectiveFlux = solution.objectiveValue.toFixed(3)
-        }
-        this.setState({
-          modelData: newModel,
-          model,
-          oldModel,
-          currentObjective,
-          reactionData,
-          objectiveFlux
-        })
-      }
+      this.setState({
+        modelData: newModel,
+        model,
+        oldModel
+      })
+      this.runThrottledOptimization()
     } else {
       this.setState({
         modelData: newModel,
         model,
         oldModel,
-        currentObjective,
-        reactionData,
-        objectiveFlux
+        reactionData: null,
+        objectiveFlux: null
       })
     }
   }
 
-  runOptimization (reactionData, objectiveFlux) {
-    let solution = null
+  /**
+   * Solves the new model parameters and updates reactionData and objectiveFlux to reflect
+   * the changes.
+   */
+  runOptimization () {
+    let reactionData = null
+    let objectiveFlux = 'Infeasible solution/Dead cell'
     cobraWorker.postMessage(this.state.model)
     cobraWorker.onmessage = (message) => {
-      solution = message.data
-      if (solution.objectiveValue === null) {
-        reactionData = null
-        objectiveFlux = 'Infeasible solution/Dead cell'
-      } else {
+      const solution = message.data
+      if (solution.objectiveValue !== null) {
         reactionData = solution.fluxes
         objectiveFlux = solution.objectiveValue.toFixed(3)
       }
@@ -134,21 +97,26 @@ class App extends Component {
    * matches the BiGG ID parameter then sets the lower and upper bounds of that
    * reaction to the bounds contained in the bounds parameter before finding the
    * new set of fluxes and setting the state of reactionData.
-   * @param {number[]} bounds - A two membered list of a reaction's lower and
+   * @param {number[]} bounds - A two membered array of a reaction's lower and
    * upper bounds, respectively.
    * @param {string} biggId - BiGG ID of the reaction.
    */
   sliderChange (bounds, biggId) {
-    const reactions = this.state.model.reactions
-    let reactionData = null
-    let objectiveFlux = null
-    for (let i = 0, l = reactions.length; i < l; i++) {
+    const reactions = [...this.state.model.reactions]
+    for (let i = 0; i < reactions.length; i++) {
       if (reactions[i].id === biggId) {
         reactions[i].lower_bound = bounds[0]
         reactions[i].upper_bound = bounds[1]
+        this.setState(prevState => ({
+          model: {
+            ...prevState.model,
+            reactions
+          }
+        }))
+        break
       }
     }
-    this.runThrottledOptimization(reactionData, objectiveFlux)
+    this.runThrottledOptimization()
   }
 
   /**
@@ -159,34 +127,17 @@ class App extends Component {
     const model = COBRA.modelFromJsonData(this.state.modelData)
     if (!model) { return }
     const reactions = model.reactions
-    let currentObjective = {}
-    let objectiveFlux = null
-    let reactionData = null
-    let solution = null
+    const objectives = {}
     for (let i = 0, l = reactions.length; i < l; i++) {
-      if (reactions[i].objective_coefficient === 1) {
-        currentObjective.biggId = reactions[i].id
-        currentObjective.coefficient = 1
+      if (reactions[i].objective_coefficient !== 0) {
+        objectives[reactions[i].id] = reactions[i].objective_coefficient
       }
     }
-    // instead call runOptimization
-    cobraWorker.postMessage(model)
-    cobraWorker.onmessage = (message) => {
-      solution = message.data
-      if (solution.objectiveValue === null) {
-        reactionData = null
-        objectiveFlux = 'Infeasible solution/Dead cell'
-      } else {
-        reactionData = solution.fluxes
-        objectiveFlux = solution.objectiveValue.toFixed(3)
-      }
-      this.setState({
-        model,
-        currentObjective,
-        reactionData,
-        objectiveFlux
-      })
-    }
+    this.setState({
+      model,
+      currentObjective: Object.keys(objectives).join(', ')
+    })
+    this.runThrottledOptimization()
   }
 
   /**
@@ -199,41 +150,56 @@ class App extends Component {
    * @param {number} coefficient - Either positive or negative 1 for maximization and minimization
    */
   setObjective (biggId, coefficient) {
-    const reactions = this.state.model.reactions
-    let objectiveFlux = null
-    let reactionData = null
-    let model = null
-    let solution = null
-    for (let i = 0, l = reactions.length; i < l; i++) {
-      if (reactions[i].id === biggId) {
-        reactions[i].objective_coefficient = coefficient
+    const reactions = [...this.state.model.reactions]
+    const index = reactions.findIndex(x => x.id === biggId)
+    let objectives = {}
+    if (this.state.compoundObjectives) {
+      objectives = Object.assign({}, this.state.objectives)
+      if (objectives[reactions[index].id] === coefficient && Object.keys(objectives).length > 1) {
+        reactions[index].objective_coefficient = 0
+        delete objectives[biggId]
       } else {
-        reactions[i].objective_coefficient = 0
+        reactions[index].objective_coefficient = coefficient
+        objectives[biggId] = coefficient
+      }
+    } else {
+      for (let reaction of reactions) {
+        if (reaction.id === biggId) {
+          reaction.objective_coefficient = coefficient
+          objectives[biggId] = coefficient
+        } else {
+          reaction.objective_coefficient = 0
+        }
       }
     }
-    cobraWorker.postMessage(this.state.model)
-    cobraWorker.onmessage = (message) => {
-      solution = message.data
-      if (solution.objectiveValue === null) {
-        reactionData = null
-        model = this.state.model
-        objectiveFlux = 'Infeasible solution/Dead cell'
-      } else {
-        reactionData = solution.fluxes
-        model = this.state.model
-        objectiveFlux = solution.objectiveValue.toFixed(3)
+    this.setState(prevState => ({
+      model: {
+        ...prevState.model,
+        reactions
+      },
+      currentObjective: Object.keys(objectives).join(', '),
+      objectives
+    }))
+    this.runThrottledOptimization()
+  }
+
+  toggleCompoundObjectives () {
+    this.setState({
+      compoundObjectives: !this.state.compoundObjectives
+    })
+    if (!this.state.compoundObjectives) {
+      const model = COBRA.modelFromJsonData(this.state.modelData)
+      if (!model) { return }
+      for (let reaction of model.reactions) {
+        if (reaction.objective_coefficient !== 0) {
+          this.setObjective(reaction.id, reaction.objective_coefficient)
+          break
+        }
       }
-      this.setState({
-        reactionData,
-        model,
-        currentObjective: {biggId: biggId, coefficient: coefficient},
-        objectiveFlux
-      })
     }
   }
 
   render () {
-    // console.log(window.screen.availWidth)
     return (
       <div className='App'>
         <EscherContainer
@@ -241,7 +207,7 @@ class App extends Component {
           oldModel={this.state.oldModel}
           map={map}
           reactionData={this.state.reactionData}
-          currentObjective={this.state.currentObjective}
+          objectives={this.state.objectives}
           sliderChange={(bounds, biggId) => this.sliderChange(bounds, biggId)}
           resetReaction={(biggId) => this.resetReaction(biggId)}
           setObjective={(biggId, coefficient) => this.setObjective(biggId, coefficient)}
@@ -253,13 +219,20 @@ class App extends Component {
         <div className='bottomPanel'>
           <div className='statusBar'>
             Current Flux: {this.state.currentObjective
-              ? this.state.currentObjective.biggId
+              ? this.state.currentObjective
               : ''
             }
             <br />
             Flux Through Objective: {this.state.objectiveFlux}
           </div>
           <div>
+            <button
+              className='appButton'
+              id='compound'
+              onClick={() => this.toggleCompoundObjectives()}
+              >
+              Toggle Compound Objectives {this.state.compoundObjectives ? 'Off' : 'On'}
+            </button>
             <button
               className='appButton'
               id='reset'

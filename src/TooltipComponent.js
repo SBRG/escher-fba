@@ -69,12 +69,12 @@ class TooltipComponent extends Component {
       // Only updates all of the flux data when the reaction, model, or objective changes. 
       // Otherwise only updates the current flux.
       if (nextProps.biggId !== this.props.biggId ||
-        nextProps.model !== this.props.model ||
-        nextProps.currentObjective !== this.state.currentObjective) {
+        nextProps.model !== this.props.model) {
         //
         for (let i = 0, l = nextProps.model.reactions.length; i < l; i++) {
           //
           if (nextProps.model.reactions[i].id === nextProps.biggId) {
+            reactionInModel = true
             fluxData.lowerBound = nextProps.model.reactions[i].lower_bound
             fluxData.upperBound = nextProps.model.reactions[i].upper_bound
             fluxData.lowerBoundString = nextProps.model.reactions[i].lower_bound.toString()
@@ -82,13 +82,7 @@ class TooltipComponent extends Component {
             fluxData.lowerBoundOld = nextProps.oldModel.reactions[i].lower_bound
             fluxData.upperBoundOld = nextProps.oldModel.reactions[i].upper_bound
             fluxData.name = nextProps.model.reactions[i].name
-            reactionInModel = true
-            if (nextProps.currentObjective.biggId === nextProps.biggId) {
-              fluxData.isCurrentObjective = true
-            } else {
-              fluxData.isCurrentObjective = false
-            }
-            fluxData.coefficient = nextProps.currentObjective.coefficient
+            fluxData.coefficient = nextProps.model.reactions[i].objective_coefficient
             if (nextProps.reactionData !== null) {
               fluxData.currentFlux = nextProps.reactionData[nextProps.biggId]
             } else {
@@ -98,6 +92,7 @@ class TooltipComponent extends Component {
           }
         }
       } else {
+        reactionInModel = true
         for (let i = 0, l = nextProps.model.reactions.length; i < l; i++) {
           if (nextProps.model.reactions[i].id === nextProps.biggId) {
             if (nextProps.reactionData !== null) {
@@ -280,6 +275,7 @@ class TooltipComponent extends Component {
   }
 
   render () {
+    console.log(this.props.objectives[this.props.biggId])
     if (this.state.type === 'reaction' && this.state.reactionInModel) {
       return (
         <div className='Tooltip'
@@ -382,18 +378,28 @@ class TooltipComponent extends Component {
                 Reset
               </button>
               <button
-                className='button'
+                className={
+                  this.props.objectives[this.props.biggId] === 1 && Object.keys(this.props.objectives).length === 1
+                    ? 'disabled'
+                    : this.props.objectives[this.props.biggId] === 1
+                    ? 'activeButton'
+                    : 'button'
+                }
                 onClick={() => this.props.setObjective(this.props.biggId, 1)}
-                disabled={this.state.isCurrentObjective &&
-                  this.state.coefficient === 1}
+                disabled={Object.keys(this.props.objectives).length === 1 && this.props.objectives[this.props.biggId] === 1}
               >
                 Maximize
               </button>
               <button
-                className='button'
+                className={
+                  this.props.objectives[this.props.biggId] === -1 && Object.keys(this.props.objectives).length === 1
+                    ? 'disabled'
+                    : this.props.objectives[this.props.biggId] === -1
+                    ? 'activeButton'
+                    : 'button'
+                }
                 onClick={() => this.props.setObjective(this.props.biggId, -1)}
-                disabled={this.state.isCurrentObjective &&
-                  this.state.coefficient === -1}
+                disabled={Object.keys(this.props.objectives).length === 1 && this.props.objectives[this.props.biggId] === -1}
               >
                 Minimize
               </button>

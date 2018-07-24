@@ -227,11 +227,15 @@ class App extends Component {
           </div>
           <div>
             <button
-              className='appButton'
+              className={
+                this.state.compoundObjectives
+                ? 'appButton active'
+                : 'appButton'
+              }
               id='compound'
               onClick={() => this.toggleCompoundObjectives()}
-              >
-              Toggle Compound Objectives {this.state.compoundObjectives ? 'Off' : 'On'}
+            >
+              Compound Objectives
             </button>
             <button
               className='appButton'

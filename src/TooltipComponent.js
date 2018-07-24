@@ -59,14 +59,14 @@ class TooltipComponent extends Component {
     // By default, reaction is not in model
     let reactionInModel = false
 
-    // If the selected map object is a reaction and there is a model, collect the necessary 
+    // If the selected map object is a reaction and there is a model, collect the necessary
     // flux data and calculate placement of arrows and current flux label.
     // Otherwise, only pass the type to the tooltip.
     if (nextProps.type === 'reaction' && !(nextProps.model === undefined ||
       nextProps.model === null)) {
       const fluxData = {}
 
-      // Only updates all of the flux data when the reaction, model, or objective changes. 
+      // Only updates all of the flux data when the reaction, model, or objective changes.
       // Otherwise only updates the current flux.
       if (nextProps.biggId !== this.props.biggId ||
         nextProps.model !== this.props.model) {
@@ -379,11 +379,9 @@ class TooltipComponent extends Component {
               </button>
               <button
                 className={
-                  this.props.objectives[this.props.biggId] === 1 && Object.keys(this.props.objectives).length === 1
-                    ? 'disabled'
-                    : this.props.objectives[this.props.biggId] === 1
-                    ? 'activeButton'
-                    : 'button'
+                    this.props.objectives[this.props.biggId] === 1
+                    ? 'active'
+                    : ''
                 }
                 onClick={() => this.props.setObjective(this.props.biggId, 1)}
                 disabled={Object.keys(this.props.objectives).length === 1 && this.props.objectives[this.props.biggId] === 1}

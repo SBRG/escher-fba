@@ -42,8 +42,10 @@
   width: auto;
 }
 
-.Tooltip .button:disabled {
+.Tooltip .disabled {
+  border: 1px solid #2E2F2F;
   color: gray;
+  border-radius: 4px;
   background-color: #D8D8D8;
   background-image: linear-gradient(#D8D8D8, #D8D8D8);
   cursor: not-allowed;

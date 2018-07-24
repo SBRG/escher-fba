@@ -187,12 +187,14 @@ class App extends Component {
     this.setState({
       compoundObjectives: !this.state.compoundObjectives
     })
-    const model = COBRA.modelFromJsonData(this.state.modelData)
-    if (!model) { return }
-    for (let reaction of model.reactions) {
-      if (reaction.objective_coefficient !== 0) {
-        this.setObjective(reaction.id, reaction.objective_coefficient)
-        break
+    if (!this.state.compoundObjectives) {
+      const model = COBRA.modelFromJsonData(this.state.modelData)
+      if (!model) { return }
+      for (let reaction of model.reactions) {
+        if (reaction.objective_coefficient !== 0) {
+          this.setObjective(reaction.id, reaction.objective_coefficient)
+          break
+        }
       }
     }
   }

@@ -275,6 +275,7 @@ class TooltipComponent extends Component {
   }
 
   render () {
+    console.log(this.props.objectives[this.props.biggId])
     if (this.state.type === 'reaction' && this.state.reactionInModel) {
       return (
         <div className='Tooltip'
@@ -378,25 +379,27 @@ class TooltipComponent extends Component {
               </button>
               <button
                 className={
-                  Object.keys(this.props.objectives).includes(this.props.biggId) &&
-                  this.state.coefficient === 1
+                  this.props.objectives[this.props.biggId] === 1 && Object.keys(this.props.objectives).length === 1
+                    ? 'disabled'
+                    : this.props.objectives[this.props.biggId] === 1
                     ? 'activeButton'
                     : 'button'
                 }
                 onClick={() => this.props.setObjective(this.props.biggId, 1)}
-                disabled={Object.keys(this.props.objectives).length = 1 && this.props.objectives[this.props.biggId]}
+                disabled={Object.keys(this.props.objectives).length === 1 && this.props.objectives[this.props.biggId] === 1}
               >
                 Maximize
               </button>
               <button
                 className={
-                  Object.keys(this.props.objectives).includes(this.props.biggId) &&
-                  this.state.coefficient === -1
+                  this.props.objectives[this.props.biggId] === -1 && Object.keys(this.props.objectives).length === 1
+                    ? 'disabled'
+                    : this.props.objectives[this.props.biggId] === -1
                     ? 'activeButton'
                     : 'button'
                 }
                 onClick={() => this.props.setObjective(this.props.biggId, -1)}
-                disabled={Object.keys(this.props.objectives).length = 1 && this.props.objectives[this.props.biggId]}
+                disabled={Object.keys(this.props.objectives).length === 1 && this.props.objectives[this.props.biggId] === -1}
               >
                 Minimize
               </button>

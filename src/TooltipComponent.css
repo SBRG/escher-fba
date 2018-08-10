@@ -84,3 +84,11 @@
   flex-direction: column;
   align-self: center;
 }
+
+.Tooltip .fvaIndicator {
+  background-color: blue;
+  height: 10px;
+  position: absolute;
+  margin-top: -3px;
+  z-index: -1;
+}

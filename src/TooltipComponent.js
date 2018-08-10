@@ -203,18 +203,6 @@ class TooltipComponent extends Component {
     })
   }
 
-  handleMarkerPosition (currentFlux) {
-    if (this.props.reactionData !== null) {
-      return currentFlux < this.props.lowerRange // Add parenthesis for better readability
-        ? 0
-        : currentFlux > this.props.upperRange
-        ? 2 * (this.props.upperRange + 1)
-        : currentFlux + this.props.upperRange + 1
-    } else {
-      return this.props.upperRange + 1
-    }
-  }
-
   handleKeyUp (event, bounds) {
     this.setState({
       lowerBoundString: bounds[0],
@@ -275,7 +263,6 @@ class TooltipComponent extends Component {
   }
 
   render () {
-    console.log(this.props.objectives[this.props.biggId])
     if (this.state.type === 'reaction' && this.state.reactionInModel) {
       return (
         <div className='Tooltip'
@@ -307,7 +294,13 @@ class TooltipComponent extends Component {
               pushable={0}
               onChange={f => this.sliderChange(this.boundConverter(f))}
               onAfterChange={f => this.onTouchEnd(this.boundConverter(f))}
-            />
+            >
+              {/* <div className={'fvaIndicator'} style={this.state.fvaBounds ? {
+                marginLeft: this.state.fvaBounds.lower / (this.props.upperRange + 1) * 100 + '%', 
+                width: (this.state.fvaBounds.upper - this.state.fvaBounds.lower) / (this.props.upperRange + 1) * 100 + '%'
+                } : {}} 
+              /> */}
+            </Range>
             <div className='indicator' style={this.state.indicatorStyle}>
               <svg viewBox='0 0 100 100' height='100%' width='100%'>
                 <defs>

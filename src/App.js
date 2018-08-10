@@ -13,6 +13,7 @@ import COBRAWorker from 'worker-loader!babel-loader!./COBRA.worker.js'
 
 const _ = escher.libs.underscore
 const cobraWorker = new COBRAWorker()
+const fvaWorker = new COBRAWorker()
 
 class App extends Component {
   constructor (props) {
@@ -199,6 +200,32 @@ class App extends Component {
     }
   }
 
+  getFva (biggId) {
+    let upper = null
+    let lower = null
+    const model = Object.assign({}, COBRA.modelFromJsonData(this.state.modelData))
+    const index = model.reactions.findIndex(x => x.id === biggId)
+    for (let reaction of model.reactions) {
+      if (reaction.id !== biggId) {
+        reaction.objective_coefficient = 0
+      }
+    }
+    model.reactions[index].objective_coefficient = 1
+    model.reactions[index].upper_bound = 1000
+    model.reactions[index].lower_bound = -1000
+    fvaWorker.postMessage(model)
+    fvaWorker.onmessage = (message) => {
+      upper = message.data.fluxes[biggId].toFixed(3)
+      model.reactions[index].objective_coefficient = -1
+      fvaWorker.postMessage(model)
+      fvaWorker.onmessage = (message) => {
+        lower = message.data.fluxes[biggId].toFixed(3)
+        console.log(upper, lower)
+        return {upper, lower}
+      }
+    }
+  }
+
   render () {
     return (
       <div className='App'>
@@ -212,6 +239,7 @@ class App extends Component {
           resetReaction={(biggId) => this.resetReaction(biggId)}
           setObjective={(biggId, coefficient) => this.setObjective(biggId, coefficient)}
           loadModel={(newModel) => this.loadModel(newModel)}
+          getFva={biggId => this.getFva(biggId)}
           lowerRange={-25}
           upperRange={25}
           step={0.01}

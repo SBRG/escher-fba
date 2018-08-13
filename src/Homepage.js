@@ -57,11 +57,14 @@ class Homepage extends Component {
 
           <hr />
 
+          <h2>Funding</h2>
+
           <p id='funding'>
             Funding provided by the Novo Nordisk Foundation through the Center
             for Biosustainability at the Technical University of Denmark
             (NNF10CC1016517).
           </p>
+
           <div id='logos'>
             <a href='http://systemsbiology.ucsd.edu/'><img id='sbrg-logo' alt='' src={sbrg} /></a>
             <a href='http://novonordiskfonden.dk/en'><img id='nnf-logo' alt='' src={nnf} /></a>

@@ -128,14 +128,19 @@ class App extends Component {
     if (!model) { return }
     const reactions = model.reactions
     const objectives = {}
+    let compoundObjectives = false
     for (let i = 0, l = reactions.length; i < l; i++) {
       if (reactions[i].objective_coefficient !== 0) {
         objectives[reactions[i].id] = reactions[i].objective_coefficient
       }
     }
+    if (objectives.length > 1) {
+      compoundObjectives = true
+    }
     this.setState({
       model,
-      currentObjective: Object.keys(objectives).join(', ')
+      currentObjective: Object.keys(objectives).join(', '),
+      compoundObjectives
     })
     this.runThrottledOptimization()
   }

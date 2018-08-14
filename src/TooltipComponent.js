@@ -275,7 +275,6 @@ class TooltipComponent extends Component {
   }
 
   render () {
-    console.log(this.props.objectives[this.props.biggId])
     if (this.state.type === 'reaction' && this.state.reactionInModel) {
       return (
         <div className='Tooltip'

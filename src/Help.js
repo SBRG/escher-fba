@@ -43,6 +43,12 @@ class Help extends Component {
           reaction.
         </p>
 
+        <p>
+          Toggle the <button className='demoButton'>Compound Objectives</button> 
+          button on to allow for multiple maximize and minimize objectives to be 
+          set.
+        </p>
+
         <h2>About Escher</h2>
 
         <p>

@@ -52,15 +52,22 @@ class Help extends Component {
           check out the <a href='https://escher.readthedocs.io'>Documentation</a>.
         </p>
 
-        <h2>How to cite</h2>
+        <h2>How do I cite Escher-FBA?</h2>
 
         <p>
-          You can support Escher-FBA by citing our preprint:
+          You can support Escher-FBA by citing our preprint. This really, really helps!
         </p>
 
         <p>
           EG Rowe, BO Palsson, ZA King. <b>Escher-FBA: A web application for interactive flux balance analysis</b>.
           bioRxiv 281600; <a href='https://doi.org/10.1101/281600'>https://doi.org/10.1101/281600</a>.
+        </p>
+
+        <h2>How can I report bugs and give feedback?</h2>
+
+        <p>
+          A bug tracker and development roadmap can be found at the following
+          site. Please feel free to contribute! <a href="https://github.com/SBRG/escher-fba-feedback">https://github.com/SBRG/escher-fba-feedback</a>
         </p>
       </div>
     )

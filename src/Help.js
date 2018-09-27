@@ -44,8 +44,8 @@ class Help extends Component {
         </p>
 
         <p>
-          Toggle the <button className='demoButton'>Compound Objectives</button> 
-          button on to allow for multiple maximize and minimize objectives to be 
+          Toggle the <button className='demoButton'>Compound Objectives</button>
+          button on to allow for multiple maximize and minimize objectives to be
           set.
         </p>
 
@@ -65,8 +65,8 @@ class Help extends Component {
         </p>
 
         <p>
-          EG Rowe, BO Palsson, ZA King. <b>Escher-FBA: A web application for interactive flux balance analysis</b>.
-          bioRxiv 281600; <a href='https://doi.org/10.1101/281600'>https://doi.org/10.1101/281600</a>.
+          EG Rowe, BO Palsson, ZA King (2018) Escher-FBA: a web application for
+          interactive flux balance analysis. <i>BMC Sys Bio</i> 12:84 <a href='https://doi.org/10.1186/s12918-018-0607-5'>https://doi.org/10.1186/s12918-018-0607-5</a>
         </p>
 
         <h2>How can I report bugs and give feedback?</h2>

@@ -56,6 +56,8 @@ class TooltipComponent extends Component {
   }
 
   componentWillReceiveProps (nextProps) {
+    console.log('component', nextProps)
+
     // By default, reaction is not in model
     let reactionInModel = false
 

@@ -5,14 +5,14 @@ import { h, Component } from 'preact'
 import './App.css'
 import EscherContainer from './EscherContainer.js'
 import Help from './Help.js'
-import * as COBRA from './COBRA.js'
+import * as cobra from './cobra.js'
 import * as escher from 'escher'
 import modelData from './data/E coli core.json'
 import map from './data/E coli core.Core metabolism.json'
-import COBRAWorker from 'worker-loader!babel-loader!./COBRA.worker.js'
+import CobraWorker from 'worker-loader!babel-loader!./cobra.worker.js'
 
 const _ = escher.libs.underscore
-const cobraWorker = new COBRAWorker()
+const cobraWorker = new CobraWorker()
 
 class App extends Component {
   constructor (props) {
@@ -31,8 +31,8 @@ class App extends Component {
 
   componentWillMount () {
     this.setState({
-      model: COBRA.modelFromJsonData(this.state.modelData),
-      oldModel: COBRA.modelFromJsonData(this.state.modelData)
+      model: cobra.modelFromJsonData(this.state.modelData),
+      oldModel: cobra.modelFromJsonData(this.state.modelData)
     })
   }
 
@@ -46,8 +46,8 @@ class App extends Component {
   }
 
   loadModel (newModel) {
-    const model = COBRA.modelFromJsonData(newModel)
-    const oldModel = COBRA.modelFromJsonData(newModel)
+    const model = cobra.modelFromJsonData(newModel)
+    const oldModel = cobra.modelFromJsonData(newModel)
     if (model !== null) {
       for (let reaction of this.state.model.reactions) {
         if (reaction.objective_coefficient !== 0) {
@@ -124,7 +124,7 @@ class App extends Component {
    * the original model and finds the set of fluxes.
    */
   resetMap () {
-    const model = COBRA.modelFromJsonData(this.state.modelData)
+    const model = cobra.modelFromJsonData(this.state.modelData)
     if (!model) { return }
     const reactions = model.reactions
     const objectives = {}
@@ -193,7 +193,7 @@ class App extends Component {
       compoundObjectives: !this.state.compoundObjectives
     })
     if (!this.state.compoundObjectives) {
-      const model = COBRA.modelFromJsonData(this.state.modelData)
+      const model = cobra.modelFromJsonData(this.state.modelData)
       if (!model) { return }
       for (let reaction of model.reactions) {
         if (reaction.objective_coefficient !== 0) {

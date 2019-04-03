@@ -1,7 +1,7 @@
 /** @jsx h */
+
 import { h, Component } from 'preact'
 import TooltipComponent from './TooltipComponent.js'
-import _ from 'underscore'
 import { Builder } from 'escher'
 
 class EscherContainer extends Component {

@@ -49,29 +49,43 @@ class TooltipComponent extends Component {
   constructor (props) {
     super(props)
     this.state = {
+      lowerBound: 0,
+      upperBound: 0,
+      lowerBoundOld: 0,
+      upperBoundOld: 0,
+      currentFlux: 0,
+      coefficient: 0,
       lowerBoundString: '',
       upperBoundString: '',
+      type: 'reaction',
+      name: '',
+      reactionInModel: true,
+      indicatorStyle,
+      fluxDisplayStyle,
       tooltipStyle
     }
+    this.initState(props, {})
   }
 
   componentWillReceiveProps (nextProps) {
-    console.log('component', nextProps)
+    this.initState(nextProps, this.props)
+  }
 
+  initState (nextProps, lastProps) {
     // By default, reaction is not in model
     let reactionInModel = false
 
     // If the selected map object is a reaction and there is a model, collect the necessary
     // flux data and calculate placement of arrows and current flux label.
     // Otherwise, only pass the type to the tooltip.
-    if (nextProps.type === 'reaction' && !(nextProps.model === undefined ||
-      nextProps.model === null)) {
+    if (nextProps.type === 'reaction' &&
+        !(nextProps.model === undefined || nextProps.model === null)) {
       const fluxData = {}
 
       // Only updates all of the flux data when the reaction, model, or objective changes.
       // Otherwise only updates the current flux.
-      if (nextProps.biggId !== this.props.biggId ||
-        nextProps.model !== this.props.model) {
+      if (nextProps.biggId !== lastProps.biggId ||
+        nextProps.model !== lastProps.model) {
         //
         for (let i = 0, l = nextProps.model.reactions.length; i < l; i++) {
           //
@@ -132,6 +146,7 @@ class TooltipComponent extends Component {
           visibility: 'hidden'
         }
       }
+      console.log(nextProps.reactionData, arrowPosition, fluxData.currentFlux, nextProps.upperRange)
       this.setState({
         ...fluxData,
         reactionInModel,
@@ -139,11 +154,11 @@ class TooltipComponent extends Component {
         indicatorStyle: {...indicatorStyle, ...arrowPosition},
         type: nextProps.type
       })
+
     } else {
-      reactionInModel = false
       this.setState({
         type: nextProps.type,
-        reactionInModel
+        reactionInModel: false
       })
     }
   }
@@ -224,7 +239,7 @@ class TooltipComponent extends Component {
     })
     if (parseFloat(bounds[0]) !== this.state.lowerBound || parseFloat(bounds[1]) !== this.state.upperBound) {
       if (isNaN(parseFloat(event.target.value))) {
-        console.log('Invalid Bounds')
+        console.error('Invalid Bounds')
       } else {
         this.sliderChange([parseFloat(this.state.lowerBoundString), parseFloat(this.state.upperBoundString)])
       }

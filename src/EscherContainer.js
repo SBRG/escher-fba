@@ -1,7 +1,7 @@
 /** @jsx h */
 
 import { h, Component } from 'preact'
-import TooltipComponent from './TooltipComponent.js'
+import TooltipComponent from './TooltipComponent.jsx'
 import { Builder } from 'escher'
 
 class EscherContainer extends Component {
@@ -19,9 +19,7 @@ class EscherContainer extends Component {
 
   componentWillReceiveProps (nextProps) {
     if (this.state.builder) {
-      console.log('container', nextProps)
       this.state.builder.tooltip_container.passProps(nextProps)
-      console.log('setting reaction data', this.state.builder, nextProps.reactionData)
       this.state.builder.set_reaction_data(nextProps.reactionData)
     }
   }
@@ -73,7 +71,16 @@ class EscherContainer extends Component {
       never_ask_before_quit: true,
       first_load_callback: builder => {
         this.setState({ builder })
-        builder.callback_manager.set('load_model', () => this.props.loadModel())
+
+        // when the model loads in escher, pass the data along
+        builder.callback_manager.set('load_model', modelData => {
+          this.props.loadModel(modelData)
+        })
+
+        // when a map loads, need to update the tooltip_component props
+        builder.callback_manager.set('load_map', mapData => {
+          this.state.builder.tooltip_container.passProps(this.props)
+        })
       }
     })
   }

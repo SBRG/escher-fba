@@ -62,10 +62,10 @@ export class Model {
       }
 
       // S matrix values
-      for (var met_id in reaction.metabolites) {
-        ia[matInd] = metLookup[met_id]
+      for (var metId in reaction.metabolites) {
+        ia[matInd] = metLookup[metId]
         ja[matInd] = colInd
-        ar[matInd] = reaction.metabolites[met_id]
+        ar[matInd] = reaction.metabolites[metId]
         matInd++
       }
     })
@@ -90,7 +90,7 @@ export class Model {
         x[glp_get_col_name(problem, i)] = glp_get_col_prim(problem, i)
       }
     } else {
-      console.log('Invalid Solution')
+      console.error('Invalid Solution')
     }
 
     return new Solution(f, x)
@@ -121,8 +121,8 @@ export function solutionFromWorkerData ({ objectiveValue, fluxes }) {
 }
 
 /**
- *
- * @param {*} data
+ * Generate a COBRA Model object from data.
+ * @param {*} data - Data representing a COBRA model.
  */
 export function modelFromJsonData (data) {
   if (data === null) return null
@@ -135,8 +135,4 @@ export function modelFromJsonData (data) {
   model.notes = data.notes // TODO is this an object? if so clone
   model.description = data.description
   return model
-}
-
-export function modelFromJson (jsonString) {
-  return modelFromJsonData(JSON.parse(jsonString))
 }

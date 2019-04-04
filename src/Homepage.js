@@ -70,9 +70,13 @@ class Homepage extends Component {
             <a href='http://novonordiskfonden.dk/en'><img id='nnf-logo' alt='' src={nnf} /></a>
           </div>
 
-          <p id='copyright'>
-            © 2018 The Regents of the University of California
-          </p>
+          <div>
+            <span style={{float: 'left'}}>
+              © 2019 The Regents of the University of California
+            </span>
+
+            <span style={{float: 'right'}}>Version {process.env.REACT_APP_VERSION}</span>
+          </div>
         </div>
       </div>
     )

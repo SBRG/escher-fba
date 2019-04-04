@@ -128,7 +128,17 @@ export function modelFromJsonData (data) {
   if (data === null) return null
 
   const model = new Model()
-  model.reactions = data.reactions.map(x => ({...x}))
+
+  // when objective coefficients are not -1, 1, or 0, change them to 1/-1
+  model.reactions = data.reactions.map(r => {
+    let coeff = 0
+    if (r.objective_coefficient && r.objective_coefficient !== 0) {
+      if (r.objective_coefficient < 0) coeff = -1
+      else coeff = 1
+    }
+    return ({ ...r, objective_coefficient: coeff })
+  })
+
   model.metabolites = data.metabolites.map(x => ({...x}))
   model.genes = data.genes.map(x => ({...x}))
   model.id = data.id

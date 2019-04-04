@@ -46,29 +46,33 @@ class App extends Component {
   }
 
   loadModel (newModel) {
-    const model = cobra.modelFromJsonData(newModel)
-    const oldModel = cobra.modelFromJsonData(newModel)
-    if (model !== null) {
-      for (let reaction of this.state.model.reactions) {
-        if (reaction.objective_coefficient !== 0) {
-          this.setObjective(reaction.id, reaction.objective_coefficient)
-        }
-      }
+    if (newModel === null) {
       this.setState({
-        modelData: newModel,
-        model,
-        oldModel
-      })
-      this.runThrottledOptimization()
-    } else {
-      this.setState({
-        modelData: newModel,
-        model,
-        oldModel,
+        modelData: null,
+        model: null,
+        oldModel: null,
         reactionData: null,
         objectiveFlux: null
       })
     }
+
+    // load it twice so changes to model do not affect oldModel
+    const model = cobra.modelFromJsonData(newModel)
+    const oldModel = cobra.modelFromJsonData(newModel)
+    const objectives = {}
+    model.reactions.map(reaction => {
+      if (reaction.objective_coefficient !== 0) {
+        objectives[reaction.id] = reaction.objective_coefficient
+      }
+    })
+    this.setState({
+      modelData: newModel,
+      model,
+      oldModel,
+      objectives,
+      compoundObjectives: Object.keys(objectives).length > 1
+    })
+    this.runThrottledOptimization()
   }
 
   /**
@@ -137,7 +141,7 @@ class App extends Component {
     this.setState({
       model,
       objectives,
-      compoundObjectives: objectives.length > 1
+      compoundObjectives: Object.keys(objectives).length > 1
     })
     this.runThrottledOptimization()
   }

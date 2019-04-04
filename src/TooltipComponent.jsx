@@ -146,7 +146,6 @@ class TooltipComponent extends Component {
           visibility: 'hidden'
         }
       }
-      console.log(nextProps.reactionData, arrowPosition, fluxData.currentFlux, nextProps.upperRange)
       this.setState({
         ...fluxData,
         reactionInModel,
@@ -293,6 +292,12 @@ class TooltipComponent extends Component {
 
   render () {
     if (this.state.type === 'reaction' && this.state.reactionInModel) {
+      // get state of max and min buttons
+      const minimizeActive = this.props.objectives[this.props.biggId] === -1
+      const minimizeDisabled = Object.keys(this.props.objectives).length === 1 && minimizeActive
+      const maximizeActive = this.props.objectives[this.props.biggId] === 1
+      const maximizeDisabled = Object.keys(this.props.objectives).length === 1 && maximizeActive
+
       return (
         <div className='Tooltip'
           style={{
@@ -394,26 +399,16 @@ class TooltipComponent extends Component {
                 Reset
               </button>
               <button
-                className={
-                    this.props.objectives[this.props.biggId] === 1
-                    ? 'active'
-                    : ''
-                }
+                className={maximizeActive ? 'active' : ''}
                 onClick={() => this.props.setObjective(this.props.biggId, 1)}
-                disabled={Object.keys(this.props.objectives).length === 1 && this.props.objectives[this.props.biggId] === 1}
+                disabled={maximizeDisabled}
               >
                 Maximize
               </button>
               <button
-                className={
-                  this.props.objectives[this.props.biggId] === -1 && Object.keys(this.props.objectives).length === 1
-                    ? 'disabled'
-                    : this.props.objectives[this.props.biggId] === -1
-                    ? 'activeButton'
-                    : 'button'
-                }
+                className={minimizeActive ? 'active' : ''}
                 onClick={() => this.props.setObjective(this.props.biggId, -1)}
-                disabled={Object.keys(this.props.objectives).length === 1 && this.props.objectives[this.props.biggId] === -1}
+                disabled={minimizeDisabled}
               >
                 Minimize
               </button>

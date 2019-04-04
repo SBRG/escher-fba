@@ -20,7 +20,9 @@ class EscherContainer extends Component {
   componentWillReceiveProps (nextProps) {
     if (this.state.builder) {
       this.state.builder.tooltip_container.passProps(nextProps)
-      this.state.builder.set_reaction_data(nextProps.reactionData)
+      if (nextProps.reactionData !== this.props.reactionData) {
+        this.state.builder.set_reaction_data(nextProps.reactionData)
+      }
     }
   }
 

@@ -116,10 +116,6 @@ export function modelFromWorkerData (data) {
   //  Change when model structure changes significantly from original model JSON. Outputs JSON model data.
 }
 
-export function solutionFromWorkerData ({ objectiveValue, fluxes }) {
-  return new Solution(objectiveValue, fluxes)
-}
-
 /**
  * Generate a COBRA Model object from data.
  * @param {*} data - Data representing a COBRA model.

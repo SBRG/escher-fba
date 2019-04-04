@@ -124,23 +124,20 @@ class App extends Component {
    * the original model and finds the set of fluxes.
    */
   resetMap () {
+    // load the original model
     const model = cobra.modelFromJsonData(this.state.modelData)
-    if (!model) { return }
     const reactions = model.reactions
     const objectives = {}
-    let compoundObjectives = false
-    for (let i = 0, l = reactions.length; i < l; i++) {
-      if (reactions[i].objective_coefficient !== 0) {
-        objectives[reactions[i].id] = reactions[i].objective_coefficient
+    for (let i = 0; i < reactions.length; i++) {
+      const reaction = reactions[i]
+      if (reaction.objective_coefficient) { // could be undefined or 0
+        objectives[reaction.id] = reaction.objective_coefficient
       }
-    }
-    if (objectives.length > 1) {
-      compoundObjectives = true
     }
     this.setState({
       model,
-      currentObjective: Object.keys(objectives).join(', '),
-      compoundObjectives
+      objectives,
+      compoundObjectives: objectives.length > 1
     })
     this.runThrottledOptimization()
   }
@@ -182,7 +179,6 @@ class App extends Component {
         ...prevState.model,
         reactions
       },
-      currentObjective: Object.keys(objectives).join(', '),
       objectives
     }))
     this.runThrottledOptimization()
@@ -223,10 +219,7 @@ class App extends Component {
         />
         <div className='bottomPanel'>
           <div className='statusBar'>
-            Current Flux: {this.state.currentObjective
-              ? this.state.currentObjective
-              : ''
-            }
+            Current Flux: {Object.keys(this.state.objectives).join(', ')}
             <br />
             Flux Through Objective: {this.state.objectiveFlux}
           </div>

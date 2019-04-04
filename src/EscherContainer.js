@@ -1,9 +1,8 @@
 /** @jsx h */
+
 import { h, Component } from 'preact'
-import * as escher from 'escher'
-import TooltipComponent from './TooltipComponent.js'
-const _ = escher.libs.underscore
-const Builder = escher.Builder
+import TooltipComponent from './TooltipComponent.jsx'
+import { Builder } from 'escher'
 
 class EscherContainer extends Component {
   constructor (props) {
@@ -19,15 +18,12 @@ class EscherContainer extends Component {
   }
 
   componentWillReceiveProps (nextProps) {
-    if (this.state.builder === null) {
-      console.warn('Builder not loaded yet')
-      return
+    if (this.state.builder) {
+      this.state.builder.tooltip_container.passProps(nextProps)
+      if (nextProps.reactionData !== this.props.reactionData) {
+        this.state.builder.set_reaction_data(nextProps.reactionData)
+      }
     }
-    // console.log('Setting reaction data')
-    this.state.builder.pass_tooltip_component_props(nextProps)
-    _.defer(() => {
-      this.state.builder.set_reaction_data(nextProps.reactionData)
-    })
   }
 
   kosAddGroup (builder) {
@@ -36,8 +32,6 @@ class EscherContainer extends Component {
       .select('.zoom-g')
       .append('g').attr('id', 'ko-markers')
     this.setState({koMarkersSel})
-
-    _.values(builder.map.reactions, r => r.bigg_id === 'GAPD')
   }
 
   /**
@@ -61,7 +55,8 @@ class EscherContainer extends Component {
   }
 
   componentDidMount () {
-    const builder = new Builder(this.props.map, this.props.model, null, this.base, {
+    // eslint-disable-next-line no-new
+    new Builder(this.props.map, this.props.model, null, this.base, {
       fill_screen: true,
       enable_keys: true,
       reaction_scale: [
@@ -70,22 +65,31 @@ class EscherContainer extends Component {
         {type: 'value', value: 20, color: '#209123', size: 20},
         {type: 'max', color: '#ff0000', size: 25}
       ],
-      // reaction_scale_preset: 'namepreset',
       tooltip_component: TooltipComponent,
+      enable_keys_with_tooltip: false,
       reaction_styles: ['color', 'size', 'text', 'abs'],
       disabled_buttons: ['Load reaction data', 'Load gene data'],
       reaction_scale_preset: 'GaBuGeRd',
       metabolite_scale_preset: 'GaBuGeRd',
-      never_ask_before_quit: true
+      never_ask_before_quit: true,
+      first_load_callback: builder => {
+        this.setState({ builder })
+
+        // when the model loads in escher, pass the data along
+        builder.callback_manager.set('load_model', modelData => {
+          this.props.loadModel(modelData)
+        })
+
+        // when a map loads, need to update the tooltip_component props
+        builder.callback_manager.set('load_map', mapData => {
+          this.state.builder.tooltip_container.passProps(this.props)
+        })
+      }
     })
-    this.setState({ builder })
-    this.state.builder.callback_manager.set('load_model', this.props.loadModel.bind(this))
   }
 
   render () {
-    return (
-      <div className='EscherContainer' />
-    )
+    return <div className='EscherContainer' />
   }
 }
 

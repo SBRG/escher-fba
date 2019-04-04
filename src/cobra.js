@@ -62,10 +62,10 @@ export class Model {
       }
 
       // S matrix values
-      for (var met_id in reaction.metabolites) {
-        ia[matInd] = metLookup[met_id]
+      for (var metId in reaction.metabolites) {
+        ia[matInd] = metLookup[metId]
         ja[matInd] = colInd
-        ar[matInd] = reaction.metabolites[met_id]
+        ar[matInd] = reaction.metabolites[metId]
         matInd++
       }
     })
@@ -90,7 +90,7 @@ export class Model {
         x[glp_get_col_name(problem, i)] = glp_get_col_prim(problem, i)
       }
     } else {
-      console.log('Invalid Solution')
+      console.error('Invalid Solution')
     }
 
     return new Solution(f, x)
@@ -116,29 +116,29 @@ export function modelFromWorkerData (data) {
   //  Change when model structure changes significantly from original model JSON. Outputs JSON model data.
 }
 
-export function solutionFromWorkerData ({ objectiveValue, fluxes }) {
-  return new Solution(objectiveValue, fluxes)
-}
-
 /**
- *
- * @param {*} data
+ * Generate a COBRA Model object from data.
+ * @param {*} data - Data representing a COBRA model.
  */
 export function modelFromJsonData (data) {
-  let model = new Model()
-  if (data !== null) {
-    model.reactions = data.reactions.map(x => ({...x}))
-    model.metabolites = data.metabolites.map(x => ({...x}))
-    model.genes = data.genes.map(x => ({...x}))
-    model.id = data.id
-    model.notes = data.notes // TODO is this an object? if so clone
-    model.description = data.description
-  } else {
-    model = null
-  }
-  return model
-}
+  if (data === null) return null
 
-export function modelFromJson (jsonString) {
-  return modelFromJsonData(JSON.parse(jsonString))
+  const model = new Model()
+
+  // when objective coefficients are not -1, 1, or 0, change them to 1/-1
+  model.reactions = data.reactions.map(r => {
+    let coeff = 0
+    if (r.objective_coefficient && r.objective_coefficient !== 0) {
+      if (r.objective_coefficient < 0) coeff = -1
+      else coeff = 1
+    }
+    return ({ ...r, objective_coefficient: coeff })
+  })
+
+  model.metabolites = data.metabolites.map(x => ({...x}))
+  model.genes = data.genes.map(x => ({...x}))
+  model.id = data.id
+  model.notes = data.notes // TODO is this an object? if so clone
+  model.description = data.description
+  return model
 }

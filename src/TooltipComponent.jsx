@@ -49,27 +49,43 @@ class TooltipComponent extends Component {
   constructor (props) {
     super(props)
     this.state = {
+      lowerBound: 0,
+      upperBound: 0,
+      lowerBoundOld: 0,
+      upperBoundOld: 0,
+      currentFlux: 0,
+      coefficient: 0,
       lowerBoundString: '',
       upperBoundString: '',
+      type: 'reaction',
+      name: '',
+      reactionInModel: true,
+      indicatorStyle,
+      fluxDisplayStyle,
       tooltipStyle
     }
+    this.initState(props, {})
   }
 
   componentWillReceiveProps (nextProps) {
+    this.initState(nextProps, this.props)
+  }
+
+  initState (nextProps, lastProps) {
     // By default, reaction is not in model
     let reactionInModel = false
 
     // If the selected map object is a reaction and there is a model, collect the necessary
     // flux data and calculate placement of arrows and current flux label.
     // Otherwise, only pass the type to the tooltip.
-    if (nextProps.type === 'reaction' && !(nextProps.model === undefined ||
-      nextProps.model === null)) {
+    if (nextProps.type === 'reaction' &&
+        !(nextProps.model === undefined || nextProps.model === null)) {
       const fluxData = {}
 
       // Only updates all of the flux data when the reaction, model, or objective changes.
       // Otherwise only updates the current flux.
-      if (nextProps.biggId !== this.props.biggId ||
-        nextProps.model !== this.props.model) {
+      if (nextProps.biggId !== lastProps.biggId ||
+        nextProps.model !== lastProps.model) {
         //
         for (let i = 0, l = nextProps.model.reactions.length; i < l; i++) {
           //
@@ -137,11 +153,11 @@ class TooltipComponent extends Component {
         indicatorStyle: {...indicatorStyle, ...arrowPosition},
         type: nextProps.type
       })
+
     } else {
-      reactionInModel = false
       this.setState({
         type: nextProps.type,
-        reactionInModel
+        reactionInModel: false
       })
     }
   }
@@ -222,7 +238,7 @@ class TooltipComponent extends Component {
     })
     if (parseFloat(bounds[0]) !== this.state.lowerBound || parseFloat(bounds[1]) !== this.state.upperBound) {
       if (isNaN(parseFloat(event.target.value))) {
-        console.log('Invalid Bounds')
+        console.error('Invalid Bounds')
       } else {
         this.sliderChange([parseFloat(this.state.lowerBoundString), parseFloat(this.state.upperBoundString)])
       }
@@ -276,6 +292,12 @@ class TooltipComponent extends Component {
 
   render () {
     if (this.state.type === 'reaction' && this.state.reactionInModel) {
+      // get state of max and min buttons
+      const minimizeActive = this.props.objectives[this.props.biggId] === -1
+      const minimizeDisabled = Object.keys(this.props.objectives).length === 1 && minimizeActive
+      const maximizeActive = this.props.objectives[this.props.biggId] === 1
+      const maximizeDisabled = Object.keys(this.props.objectives).length === 1 && maximizeActive
+
       return (
         <div className='Tooltip'
           style={{
@@ -377,26 +399,16 @@ class TooltipComponent extends Component {
                 Reset
               </button>
               <button
-                className={
-                    this.props.objectives[this.props.biggId] === 1
-                    ? 'active'
-                    : ''
-                }
+                className={maximizeActive ? 'active' : ''}
                 onClick={() => this.props.setObjective(this.props.biggId, 1)}
-                disabled={Object.keys(this.props.objectives).length === 1 && this.props.objectives[this.props.biggId] === 1}
+                disabled={maximizeDisabled}
               >
                 Maximize
               </button>
               <button
-                className={
-                  this.props.objectives[this.props.biggId] === -1 && Object.keys(this.props.objectives).length === 1
-                    ? 'disabled'
-                    : this.props.objectives[this.props.biggId] === -1
-                    ? 'activeButton'
-                    : 'button'
-                }
+                className={minimizeActive ? 'active' : ''}
                 onClick={() => this.props.setObjective(this.props.biggId, -1)}
-                disabled={Object.keys(this.props.objectives).length === 1 && this.props.objectives[this.props.biggId] === -1}
+                disabled={minimizeDisabled}
               >
                 Minimize
               </button>

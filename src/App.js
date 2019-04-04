@@ -5,14 +5,14 @@ import { h, Component } from 'preact'
 import './App.css'
 import EscherContainer from './EscherContainer.js'
 import Help from './Help.js'
-import * as COBRA from './COBRA.js'
+import * as cobra from './cobra.js'
 import * as escher from 'escher'
 import modelData from './data/E coli core.json'
 import map from './data/E coli core.Core metabolism.json'
-import COBRAWorker from 'worker-loader!babel-loader!./COBRA.worker.js'
+import CobraWorker from 'worker-loader!babel-loader!./cobra.worker.js'
 
 const _ = escher.libs.underscore
-const cobraWorker = new COBRAWorker()
+const cobraWorker = new CobraWorker()
 
 class App extends Component {
   constructor (props) {
@@ -31,8 +31,8 @@ class App extends Component {
 
   componentWillMount () {
     this.setState({
-      model: COBRA.modelFromJsonData(this.state.modelData),
-      oldModel: COBRA.modelFromJsonData(this.state.modelData)
+      model: cobra.modelFromJsonData(this.state.modelData),
+      oldModel: cobra.modelFromJsonData(this.state.modelData)
     })
   }
 
@@ -46,29 +46,33 @@ class App extends Component {
   }
 
   loadModel (newModel) {
-    const model = COBRA.modelFromJsonData(newModel)
-    const oldModel = COBRA.modelFromJsonData(newModel)
-    if (model !== null) {
-      for (let reaction of this.state.model.reactions) {
-        if (reaction.objective_coefficient !== 0) {
-          this.setObjective(reaction.id, reaction.objective_coefficient)
-        }
-      }
+    if (newModel === null) {
       this.setState({
-        modelData: newModel,
-        model,
-        oldModel
-      })
-      this.runThrottledOptimization()
-    } else {
-      this.setState({
-        modelData: newModel,
-        model,
-        oldModel,
+        modelData: null,
+        model: null,
+        oldModel: null,
         reactionData: null,
         objectiveFlux: null
       })
     }
+
+    // load it twice so changes to model do not affect oldModel
+    const model = cobra.modelFromJsonData(newModel)
+    const oldModel = cobra.modelFromJsonData(newModel)
+    const objectives = {}
+    model.reactions.map(reaction => {
+      if (reaction.objective_coefficient !== 0) {
+        objectives[reaction.id] = reaction.objective_coefficient
+      }
+    })
+    this.setState({
+      modelData: newModel,
+      model,
+      oldModel,
+      objectives,
+      compoundObjectives: Object.keys(objectives).length > 1
+    })
+    this.runThrottledOptimization()
   }
 
   /**
@@ -124,23 +128,20 @@ class App extends Component {
    * the original model and finds the set of fluxes.
    */
   resetMap () {
-    const model = COBRA.modelFromJsonData(this.state.modelData)
-    if (!model) { return }
+    // load the original model
+    const model = cobra.modelFromJsonData(this.state.modelData)
     const reactions = model.reactions
     const objectives = {}
-    let compoundObjectives = false
-    for (let i = 0, l = reactions.length; i < l; i++) {
-      if (reactions[i].objective_coefficient !== 0) {
-        objectives[reactions[i].id] = reactions[i].objective_coefficient
+    for (let i = 0; i < reactions.length; i++) {
+      const reaction = reactions[i]
+      if (reaction.objective_coefficient) { // could be undefined or 0
+        objectives[reaction.id] = reaction.objective_coefficient
       }
-    }
-    if (objectives.length > 1) {
-      compoundObjectives = true
     }
     this.setState({
       model,
-      currentObjective: Object.keys(objectives).join(', '),
-      compoundObjectives
+      objectives,
+      compoundObjectives: Object.keys(objectives).length > 1
     })
     this.runThrottledOptimization()
   }
@@ -182,7 +183,6 @@ class App extends Component {
         ...prevState.model,
         reactions
       },
-      currentObjective: Object.keys(objectives).join(', '),
       objectives
     }))
     this.runThrottledOptimization()
@@ -193,7 +193,7 @@ class App extends Component {
       compoundObjectives: !this.state.compoundObjectives
     })
     if (!this.state.compoundObjectives) {
-      const model = COBRA.modelFromJsonData(this.state.modelData)
+      const model = cobra.modelFromJsonData(this.state.modelData)
       if (!model) { return }
       for (let reaction of model.reactions) {
         if (reaction.objective_coefficient !== 0) {
@@ -223,10 +223,7 @@ class App extends Component {
         />
         <div className='bottomPanel'>
           <div className='statusBar'>
-            Current Flux: {this.state.currentObjective
-              ? this.state.currentObjective
-              : ''
-            }
+            Current Flux: {Object.keys(this.state.objectives).join(', ')}
             <br />
             Flux Through Objective: {this.state.objectiveFlux}
           </div>

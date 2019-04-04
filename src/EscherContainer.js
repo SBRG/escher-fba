@@ -64,6 +64,7 @@ class EscherContainer extends Component {
         {type: 'max', color: '#ff0000', size: 25}
       ],
       tooltip_component: TooltipComponent,
+      enable_keys_with_tooltip: false,
       reaction_styles: ['color', 'size', 'text', 'abs'],
       disabled_buttons: ['Load reaction data', 'Load gene data'],
       reaction_scale_preset: 'GaBuGeRd',

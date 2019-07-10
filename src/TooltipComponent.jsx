@@ -162,7 +162,7 @@ class TooltipComponent extends Component {
     }
   }
 
-  getSize () {
+  get_size () {
     return {width: WIDTH, height: HEIGHT}
   }
 

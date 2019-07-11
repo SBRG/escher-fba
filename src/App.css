@@ -79,6 +79,7 @@ a {
 }
 
 .bottomPanel {
+  z-index: 2000;
   box-sizing: border-box;
   display: flex;
   position: absolute;

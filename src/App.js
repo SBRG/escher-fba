@@ -60,7 +60,7 @@ class App extends Component {
     const model = cobra.modelFromJsonData(newModel)
     const oldModel = cobra.modelFromJsonData(newModel)
     const objectives = {}
-    model.reactions.map(reaction => {
+    model.reactions.forEach(reaction => {
       if (reaction.objective_coefficient !== 0) {
         objectives[reaction.id] = reaction.objective_coefficient
       }

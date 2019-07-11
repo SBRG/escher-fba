@@ -59,18 +59,10 @@ class EscherContainer extends Component {
     new Builder(this.props.map, this.props.model, null, this.base, {
       fill_screen: true,
       enable_keys: true,
-      reaction_scale: [
-        {type: 'min', color: '#c8c8c8', size: 12},
-        {type: 'value', value: 0.01, color: '#9696ff', size: 16},
-        {type: 'value', value: 20, color: '#209123', size: 20},
-        {type: 'max', color: '#ff0000', size: 25}
-      ],
       tooltip_component: TooltipComponent,
       enable_keys_with_tooltip: false,
       reaction_styles: ['color', 'size', 'text', 'abs'],
       disabled_buttons: ['Load reaction data', 'Load gene data'],
-      reaction_scale_preset: 'GaBuGeRd',
-      metabolite_scale_preset: 'GaBuGeRd',
       never_ask_before_quit: true,
       first_load_callback: builder => {
         this.setState({ builder })

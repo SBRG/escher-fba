@@ -1,13 +1,13 @@
 {
   "name": "escher-fba",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "homepage": "https://sbrg.github.io/escher-fba",
   "private": true,
   "dependencies": {
     "@just-boris/preact-scripts": "1.1.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
-    "escher": "1.7.0",
+    "escher": "1.7.1",
     "gh-pages": "^1.0.0",
     "glpk.js": "https://github.com/hgourvest/glpk.js",
     "history": "^4.7.2",
